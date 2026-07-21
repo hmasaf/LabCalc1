@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>الحاسبة العمالية</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--primary:#187860;--accent:#c0b05a;--danger:#b42318;--muted:#6b7280;--border:#e5e7eb;--shadow:0 10px 30px rgba(0,0,0,.08);--radius:14px;--text:#111827;--header-grad-1:#187860;--header-grad-2:#0f5c4a;--input-bg:#fff;--input-readonly:#f3f4f6;--summary-bg:#0b1220;--summary-text:#fff;--card-h-bg:rgba(24,120,96,.06);--result-border:rgba(24,120,96,.35);--result-bg:rgba(24,120,96,.05);--drawer-bg:#fff;--drawer-search-bg:#fafbfc;--drawer-hover:rgba(24,120,96,.06);--drawer-item-border:#f3f4f6;--drawer-group-bg:#f9fafb;--reason-bg:#fefce8;--reason-border:#eab308;--reason-accept:#059669;--reason-reject:#dc2626}
+body.dark{--bg:#0f172a;--card:#1e293b;--primary:#22c55e;--accent:#eab308;--danger:#ef4444;--muted:#94a3b8;--border:#334155;--shadow:0 10px 30px rgba(0,0,0,.4);--text:#e2e8f0;--header-grad-1:#0f5c4a;--header-grad-2:#083828;--input-bg:#0f172a;--input-readonly:#1e293b;--summary-bg:#020617;--summary-text:#e2e8f0;--card-h-bg:rgba(34,197,94,.08);--result-border:rgba(34,197,94,.35);--result-bg:rgba(34,197,94,.06);--drawer-bg:#1e293b;--drawer-search-bg:#0f172a;--drawer-hover:rgba(34,197,94,.1);--drawer-item-border:#334155;--drawer-group-bg:#0f172a;--reason-bg:#1e293b;--reason-border:#eab308;--reason-accept:#22c55e;--reason-reject:#ef4444}
+html{scroll-behavior:smooth}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);padding-bottom:16px;transition:background .2s,color .2s}
+header{background:linear-gradient(135deg,var(--header-grad-1),var(--header-grad-2));color:#fff;padding:6px 12px;position:sticky;top:0;z-index:20;box-shadow:0 8px 20px rgba(0,0,0,.12)}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}.head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:34px}
+.app-title{margin:0;font-size:16px;font-weight:800;flex:1;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px}
+.case-tag{background:rgba(192,176,90,.85);color:#111;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:800;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.save-indicator{display:inline-flex;align-items:center;gap:4px;font-size:11px;opacity:0;transition:opacity .3s;color:#4ade80;font-weight:700}
+.save-indicator.show{opacity:1}
+.save-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 6px #4ade80}
+.hbtn{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:5px 9px;cursor:pointer;font-size:15px;font-weight:700;transition:.15s;line-height:1;min-width:32px;height:30px;display:inline-flex;align-items:center;justify-content:center}
+.hbtn:hover{background:rgba(255,255,255,.28)}.hbtn.active{background:rgba(192,176,90,.8);border-color:rgba(192,176,90,.9)}
+.hbtn:disabled{opacity:.35;cursor:not-allowed}
+.header-controls{display:flex;gap:5px;align-items:center;flex-shrink:0}
+.header-left{display:flex;gap:5px;align-items:center;flex-shrink:0}
+@media(max-width:640px){.app-title{font-size:13px}.case-tag{max-width:100px;font-size:10px}.hbtn{padding:4px 6px;font-size:13px;min-width:26px;height:26px}.header-controls,.header-left{gap:3px}.save-indicator{display:none}}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:920px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.card h2{margin:0;padding:14px;font-size:16px;background:var(--card-h-bg);border-bottom:1px solid var(--border);cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--text)}
+.card>h2::after{content:'▾';font-size:12px;color:var(--muted);transition:transform .2s;font-weight:900}
+.card.collapsed>h2::after{transform:rotate(-90deg)}.card.collapsed>.body{display:none}
+.body{padding:14px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.field{flex:1 1 220px;display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.field.col-2{flex:1 1 calc(50% - 10px);max-width:calc(50% - 10px)}
+label{font-size:13px;color:var(--text)}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--input-bg);color:var(--text);font-size:14px;outline:none}
+textarea{min-height:92px;resize:vertical;line-height:1.7}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(24,120,96,.12)}
+input[readonly],textarea[readonly]{background:var(--input-readonly)}
+small{color:var(--muted);line-height:1.5}
+.btn{border:1px solid transparent;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:14px}
+.btn-primary{background:var(--primary);color:#fff}.btn-ghost{background:var(--card);border-color:var(--border);color:var(--text)}
+.btn-mini{padding:8px 10px;font-weight:800;font-size:13px;border-radius:10px;background:#111827;color:#fff;border:none;cursor:pointer}
+body.dark .btn-mini{background:#334155}
+.btn-mini.ghost{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.result{display:flex;align-items:center;justify-content:space-between;border:1px dashed var(--result-border);background:var(--result-bg);padding:10px 12px;border-radius:12px;margin-top:8px;gap:10px;flex-wrap:wrap}
+.result strong{font-size:13px}.result span{font-weight:800;font-size:15px}
+.err{color:var(--danger);font-size:13px;margin-top:4px;min-height:18px}
+.summary{background:var(--summary-bg);color:var(--summary-text);border-radius:var(--radius);padding:14px;border:1px solid rgba(255,255,255,.08)}
+.summary h3{margin:0 0 10px;font-size:16px}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sum-item{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;gap:10px}
+.sum-item b{font-size:13px}.sum-item i{font-style:normal;font-weight:900}
+.toast{position:fixed;bottom:16px;left:16px;background:#111827;color:#fff;padding:10px 14px;border-radius:12px;opacity:0;transform:translateY(10px);transition:.25s;z-index:200;font-size:13px}
+.toast.show{opacity:1;transform:translateY(0)}
+footer{color:var(--muted);text-align:center;padding:20px 12px}
+.party-badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800}
+.party-worker{background:rgba(24,120,96,.15);color:var(--primary)}
+.party-employer{background:rgba(180,35,24,.10);color:var(--danger)}
+.mini-summary{position:sticky;top:44px;z-index:18;background:linear-gradient(135deg,#c0b05a,#a99947);color:#fff;padding:6px 14px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:800;margin-bottom:14px;border-radius:10px}
+.mini-summary .ms-value{font-size:16px;font-weight:900;padding:2px 10px;background:rgba(255,255,255,.18);border-radius:6px}
+.mini-summary .ms-hide{background:rgba(255,255,255,.22);border:none;color:#fff;border-radius:6px;padding:2px 9px;cursor:pointer;font-weight:900}
+body.ms-hidden .mini-summary{display:none}
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;opacity:0;pointer-events:none;transition:.2s}
+.drawer-overlay.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,92vw);background:var(--drawer-bg);z-index:101;transform:translateX(100%);transition:.25s;display:flex;flex-direction:column;color:var(--text)}
+.drawer.open{transform:translateX(0)}
+.drawer-header{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,var(--header-grad-1),var(--header-grad-2));color:#fff}
+.drawer-header h3{margin:0;font-size:16px}
+.drawer-search{padding:10px 12px;border-bottom:1px solid var(--border);background:var(--drawer-search-bg)}
+.drawer-body{overflow-y:auto;flex:1}
+.drawer-group-title{padding:10px 14px 6px;font-size:12px;font-weight:800;color:var(--muted);background:var(--drawer-group-bg)}
+.drawer-link{display:block;padding:11px 18px;text-decoration:none;color:var(--text);font-size:14px;font-weight:600;border-bottom:1px solid var(--drawer-item-border)}
+.drawer-link:hover{background:var(--drawer-hover);color:var(--primary)}
+.drawer-link.hidden{display:none}.drawer-group.hidden{display:none}
+.drawer-shortcuts{padding:10px 14px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);background:var(--drawer-search-bg)}
+.drawer-shortcuts kbd{background:#111827;color:#fff;padding:1px 5px;border-radius:4px;font-size:10px}
+.case-item{padding:12px 16px;border-bottom:1px solid var(--drawer-item-border);cursor:pointer}
+.case-item.active{background:var(--drawer-hover);border-inline-end:3px solid var(--primary)}
+.case-name{font-weight:800;font-size:14px;color:var(--text)}
+.case-meta{font-size:11px;color:var(--muted)}
+.case-actions{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.case-actions button{background:transparent;border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer;color:var(--text)}
+.case-actions .del{color:var(--danger)}
+.case-empty{padding:24px 16px;text-align:center;color:var(--muted);font-size:13px}
+.case-toolbar{padding:12px;display:grid;gap:8px;border-bottom:1px solid var(--border);background:var(--drawer-search-bg)}
+.case-toolbar-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.quick-extract{background:linear-gradient(135deg,rgba(192,176,90,.10),rgba(24,120,96,.05));border:1px dashed var(--accent);border-radius:12px;padding:12px;margin-bottom:14px}
+.quick-extract-header{display:flex;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px}
+.quick-extract-title{font-weight:800;font-size:14px;color:var(--text)}
+.qe-preview{margin-top:8px;padding:8px 10px;background:rgba(24,120,96,.06);border:1px solid var(--result-border);border-radius:8px;font-size:12px;display:none}
+.qe-preview.show{display:block}
+.qe-preview b{color:var(--primary)}
+.qe-item{display:inline-block;background:rgba(24,120,96,.1);padding:2px 8px;border-radius:6px;margin:2px;font-weight:700}
+.qe-badge{display:inline-block;padding:2px 6px;border-radius:999px;font-size:10px;font-weight:800;background:rgba(234,179,8,.2);color:#a16207}
+.reason-toolbar{display:flex;gap:8px;flex-wrap:wrap;padding:12px;background:var(--reason-bg);border:1px solid var(--reason-border);border-radius:10px;margin-bottom:14px}
+.reason-toolbar-title{font-weight:800;font-size:14px;flex:1 1 220px;color:var(--text)}
+.reason-note{font-size:12px;color:var(--muted);width:100%;margin-top:6px}
+.reason-block{border:1px solid var(--border);border-radius:12px;margin-bottom:12px;background:var(--card)}
+.reason-header{padding:11px 14px;background:var(--card-h-bg);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.reason-title{font-weight:800;font-size:14px;color:var(--text);display:flex;align-items:center;gap:6px}
+.reason-status{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:800}
+.reason-status.accept{background:rgba(5,150,105,.15);color:var(--reason-accept)}
+.reason-status.reject{background:rgba(220,38,38,.12);color:var(--reason-reject)}
+.reason-status.neutral{background:rgba(107,114,128,.15);color:var(--muted)}
+.reason-tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);background:var(--drawer-search-bg);padding:6px 10px 0}
+.reason-tab{padding:6px 14px;font-size:12px;font-weight:800;cursor:pointer;border:1px solid var(--border);border-bottom:none;border-radius:8px 8px 0 0;background:transparent;color:var(--muted)}
+.reason-tab.active{background:var(--card);color:var(--text);position:relative;top:1px}
+.reason-tab.accept-tab.active{color:var(--reason-accept)}
+.reason-tab.reject-tab.active{color:var(--reason-reject)}
+.reason-body{padding:12px}
+.reason-textarea{width:100%;min-height:130px;font-size:14px;line-height:1.9;font-family:inherit;background:var(--input-bg);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.reason-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.reason-pane{display:none}.reason-pane.active{display:block}
+.contract-clause{background:linear-gradient(135deg,rgba(192,176,90,.08),rgba(24,120,96,.03));border:1px dashed var(--accent);border-radius:10px;padding:10px;margin-top:10px}
+.contract-clause-title{font-weight:800;font-size:13px;margin-bottom:6px;color:var(--text)}
+.verdict-block{border:2px solid var(--reason-accept);border-radius:12px;padding:14px;margin-top:12px;background:rgba(5,150,105,.05)}
+.verdict-title{font-weight:900;color:var(--reason-accept);margin-bottom:8px;font-size:14px}
+.verdict-textarea{width:100%;min-height:110px;font-size:15px;line-height:1.9;font-family:inherit;background:var(--input-bg);color:var(--text);border:1px solid var(--reason-accept);border-radius:10px;padding:10px 12px;font-weight:600}
+body.dark .verdict-block{background:rgba(34,197,94,.08)}
+body.compact .card .body{padding:8px 10px}
+body.compact input,body.compact select,body.compact textarea{padding:6px 9px;font-size:13px}
+body.discussion{font-size:17px}
+body.discussion .card>h2{font-size:20px;padding:16px}
+body.discussion label{font-size:16px;font-weight:700}
+body.discussion input,body.discussion select,body.discussion textarea{font-size:16px;padding:12px 14px}
+body.discussion .reason-textarea{font-size:19px!important;line-height:2.1;min-height:180px}
+body.discussion .verdict-textarea{font-size:19px!important;line-height:2.1;min-height:150px}
+body.discussion .reason-title{font-size:17px}
+body.discussion .result{padding:12px 14px}
+body.discussion .result span{font-size:18px}
+body.discussion .mini-summary{font-size:17px}
+body.discussion .mini-summary .ms-value{font-size:20px}
+body.discussion small{font-size:14px}
+body.discussion .btn{font-size:16px}
+body.discussion .btn-mini{font-size:15px;padding:9px 12px}
+.anchor-target{scroll-margin-top:100px}
+@media print{.mini-summary,.drawer,.drawer-overlay,.header-controls,.header-left,.quick-extract{display:none!important}header{position:static}.card>h2::after{display:none}.card.collapsed>.body{display:block!important}body.dark{background:#fff!important;color:#000!important}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border-radius:12px;padding:18px;max-width:420px;width:100%;color:var(--text)}
+.modal h4{margin:0 0 10px;font-size:16px}
+.modal p{margin:0 0 12px;font-size:13px;color:var(--muted)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+/* ℹ️ أيقونات المعلومات الإرشادية والنوافذ المنبثقة */
+.info-icon{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(24,120,96,.15);color:var(--primary);border:1.5px solid rgba(24,120,96,.35);font-size:14px;cursor:pointer;font-weight:900;transition:.15s;user-select:none;margin-inline-start:8px;flex-shrink:0}
+.info-icon:hover{background:var(--primary);color:#fff;transform:scale(1.12);box-shadow:0 4px 12px rgba(24,120,96,.4)}
+body.dark .info-icon{background:rgba(34,197,94,.15);color:var(--primary);border-color:rgba(34,197,94,.35)}
+body.dark .info-icon:hover{background:var(--primary);color:#0f172a}
+.info-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:250;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
+.info-modal-overlay.open{display:flex;animation:infoFadeIn .18s ease-out}
+@keyframes infoFadeIn{from{opacity:0}to{opacity:1}}
+.info-modal{background:var(--card);border-radius:14px;padding:20px;max-width:560px;width:100%;max-height:82vh;overflow-y:auto;color:var(--text);box-shadow:0 20px 60px rgba(0,0,0,.4);border:2px solid var(--primary);animation:infoSlideUp .22s ease-out}
+@keyframes infoSlideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.info-modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid var(--primary);gap:8px}
+.info-modal-title{font-weight:900;font-size:17px;color:var(--primary);display:flex;align-items:center;gap:8px;flex:1}
+.info-modal-close{background:transparent;border:none;font-size:24px;cursor:pointer;color:var(--muted);font-weight:900;padding:2px 10px;border-radius:8px;line-height:1;transition:.15s}
+.info-modal-close:hover{background:rgba(180,35,24,.1);color:var(--danger)}
+.info-modal-body{font-size:14px;line-height:2;color:var(--text)}
+.info-modal-body b{color:var(--primary);font-weight:900}
+.info-modal-body ul{padding-inline-start:20px;margin:8px 0}
+.info-modal-body li{margin-bottom:4px}
+.info-modal-body .info-formula{background:rgba(192,176,90,.15);border:1px dashed var(--accent);border-radius:8px;padding:6px 10px;margin:8px 0;font-weight:700;color:var(--text)}
+.info-modal-body .info-article{background:rgba(24,120,96,.08);border-inline-start:3px solid var(--primary);border-radius:6px;padding:6px 10px;margin:8px 0}
+body.dark .info-modal-body .info-article{background:rgba(34,197,94,.08)}
+body.discussion .info-modal-body{font-size:16px;line-height:2.1}
+body.discussion .info-modal-title{font-size:20px}
+body.discussion .info-icon{width:30px;height:30px;font-size:16px}
+</style>
+</head>
+<body>
+<header><div class="wrap head">
+<div class="header-left">
+<button class="hbtn" id="btnDrawer" title="الأقسام">☰</button>
+<button class="hbtn" id="btnCases" title="القضايا">📁</button>
+<button class="hbtn" id="btnUndo" title="تراجع" disabled>↶</button>
+<button class="hbtn" id="btnRedo" title="إعادة" disabled>↷</button>
+</div>
+<h1 class="app-title"><span id="caseTag" class="case-tag" style="display:none"></span><span>الحاسبة العمالية</span><span class="save-indicator" id="saveIndicator"><span class="save-dot"></span>محفوظ</span></h1>
+<div class="header-controls">
+<button class="hbtn" id="btnCollapseAll" title="طيّ">⇕</button>
+<button class="hbtn" id="btnCompact" title="مضغوط">⇔</button>
+<button class="hbtn" id="btnDiscussion" title="عرض للمناقشة">🎤</button>
+<button class="hbtn" id="btnDark" title="مظلم">🌙</button>
+<button class="hbtn" id="btnPrint" title="طباعة">⎙</button>
+<button class="hbtn" id="btnReset" title="تصفير">↻</button>
+</div>
+</div></header>
+<div class="wrap">
+<div class="mini-summary" id="miniSummary"><span>💰 الإجمالي:</span><span class="ms-value" id="ms-grand">0.00</span><span>ريال</span><span style="flex:1"></span><button class="ms-hide" id="btnMsHide">×</button></div>
+<div class="quick-extract" id="quickExtract">
+<div class="quick-extract-header">
+<div class="quick-extract-title">⚡ الاستخلاص الذكي <span class="qe-badge">🧠 v2</span></div>
+<div style="display:flex;gap:6px">
+<button class="btn btn-primary" id="btnQExtract">استخلص</button>
+<button class="btn btn-ghost" id="btnQClear">تفريغ</button>
+</div>
+</div>
+<textarea id="qeInput" placeholder="اكتب البيانات بأي أسلوب حر..."></textarea>
+<div class="qe-preview" id="qePreview"></div>
+</div>
+<div class="card" id="sec-general"><h2>البيانات العامة والأجر<span class="info-icon" data-info="general" title="معلومات إرشادية">ℹ️</span></h2><div class="body"><div class="row"><div class="field" style="flex:1 1 160px"><label>العامل</label><select id="typePer"><option value="sa" selected>سعودي</option><option value="non">غير سعودي</option></select></div><div class="field"><label>الأجر الأساسي</label><input id="basic" inputmode="decimal"></div><div class="field"><label>البدلات</label><input id="allow" inputmode="decimal"></div><div class="field"><label>الإجمالي</label><input id="total" readonly></div><div class="field"><label>بعد التأمينات</label><input id="after" inputmode="decimal"></div><div class="field"><label>بدء العلاقة</label><input id="relStart" type="text"></div><div class="field"><label>انتهاء العلاقة</label><input id="relEnd" type="text"></div><div class="field"><label>انتهاء العقد</label><input id="contractEnd" type="text"></div><div class="field col-2"><label>اسم المدعي</label><input id="plaintiff"></div><div class="field col-2"><label>اسم المدعى عليه</label><input id="defendant"></div></div><div class="err" id="err-global"></div></div></div>
+<div style="height:14px"></div>
+<div class="grid">
+<div class="card" id="sec-dateconv"><h2>تحويل التاريخ<span class="info-icon" data-info="dateconv" title="معلومات إرشادية">ℹ️</span></h2><div class="body"><div class="row"><div class="field"><label>ميلادي</label><input id="g2hDate"></div><div class="field"><label>هجري</label><input id="g2hHijri" readonly></div></div><div class="row" style="margin-top:8px"><div class="field"><label>هجري</label><input id="h2gHijri"></div><div class="field"><label>ميلادي</label><input id="h2gDate" type="date" readonly></div></div><div class="err" id="err-dateconv"></div></div></div>
+<div class="card" id="sec-probation"><h2>فترة التجربة<span class="info-icon" data-info="probation" title="معلومات إرشادية">ℹ️</span></h2><div class="body"><div class="row"><div class="field"><label>مدة التجربة (أيام)</label><input id="probDays" inputmode="numeric"></div><div class="field"><label>مرضية</label><input id="probSick" inputmode="numeric"></div><div class="field"><label>أخرى</label><input id="probOtherExcluded" inputmode="numeric"></div></div><div class="result"><strong>عطل رسمية</strong><span id="probOfficialTotal">0</span></div><div class="result"><strong>مرضية</strong><span id="probManualExcludedTotal">0</span></div><div class="result"><strong>مستثناة</strong><span id="probExcludedTotal">0</span></div><div class="result"><strong>نهاية التجربة</strong><span id="probEndDate">—</span></div><div class="result"><strong>أيام العلاقة</strong><span id="probActualDays">—</span></div><div class="result"><strong>النتيجة</strong><span id="probResult">—</span></div><textarea id="probHolidayList" readonly style="margin-top:10px"></textarea><div class="err" id="err-prob"></div></div></div>
+<div class="card" id="sec-limitation"><h2>التقادم (م234)<span class="info-icon" data-info="limitation" title="معلومات إرشادية">ℹ️</span></h2><div class="body"><div class="row"><div class="field"><label>آخر يوم عمل</label><input id="limLastDay"></div><div class="field"><label>تقديم الدعوى</label><input id="limClaimDay"></div></div><div class="result"><strong>عدد الأيام</strong><span id="limDays">—</span></div><div class="result"><strong>النتيجة</strong><span id="limMsg">—</span></div><div class="err" id="err-lim"></div></div></div>
+<div class="card" id="sec-notice"><h2>مهلة الإشعار (م75) <span id="ntcPartyBadge" class="party-badge party-worker">العامل</span><span class="info-icon" data-info="notice" title="معلومات إرشادية">ℹ️</span></h2><div class="body"><div class="row"><div class="field"><label>الطرف</label><select id="ntcParty"><option value="worker" selected>العامل</option><option value="employer">صاحب العمل</option></select></div><div class="field"><label>نوع العقد</label><select id="ntcContractType"><option value="indef_monthly" selected>غير محدد شهري</option><option value="indef_other">غير محدد</option><option value="fixed">محدد المدة</option></select></div><div class="field"><label>مدة الإشعار</label><input id="ntcDays" inputmode="numeric"></div><div class="field"><label>أساس الأجر</label><select id="wageBaseNtc"><option value="total" selected>الإجمالي</option><option value="after">بعد التأمينات</option></select></div><div class="field" id="ntcCompliedField" style="display:none"><label>أيام التزم بها العامل</label><input id="ntcCompliedDays" inputmode="numeric"></div></div><div class="result"><strong>الحد الأدنى</strong><span id="ntcMinDays">—</span></div><div class="result"><strong>المدة المعتمدة</strong><span id="ntcAppliedDays">—</span></div><div class="result" id="ntcShortageRow" style="display:none"><strong>الأيام الناقصة</strong><span id="ntcShortageDays">—</span></div><div class="result"><strong>أجر اليوم</strong><span id="ntcDailyWage">0.00</span></div><div class="result"><strong id="ntcTotalLabel">بدل الإشعار</strong><span id="ntcTotal">0.00</span></div><div class="err" id="err-ntc"></div></div></div>
+</div>
+<div style="height:14px"></div>
+<div class="grid">
+<div class="card" id="sec-late-wages"><h2>الأجور المتأخرة<span class="info-icon" data-info="latewages" title="معلومات إرشادية">ℹ️</span></h2><div class="body"><div class="field"><label>الطريقة</label><select id="rlMode"><option value="date" selected>تاريخ</option><option value="dur">أشهر/أيام</option></select></div><div id="rl-date"><div class="row"><div class="field"><label>من</label><input id="rlFrom"></div><div class="field"><label>إلى</label><input id="rlTo"></div></div></div><div id="rl-dur" style="display:none"><div class="row"><div class="field"><label>أشهر</label><input id="rlMonths" inputmode="numeric"></div><div class="field"><label>أيام</label><input id="rlDays" inputmode="numeric"></div></div></div><div class="result"><strong>الإجمالي</strong><span id="rlTotal">0.00</span></div><div class="err" id="err-rl"></div></div></div>
+<div class="card" id="sec-eosb"><h2>مكافأة نهاية الخدمة<span class="info-icon" data-info="eosb" title="معلومات إرشادية">ℹ️</span></h2><div class="body"><div class="row"><div class="field"><label>الطريقة</label><select id="esMethod"><option value="84" selected>م84</option><option value="85">م85</option></select></div><div class="field"><label>بداية</label><input id="esStart" type="date" readonly></div><div class="field"><label>نهاية</label><input id="esEnd" type="date" readonly></div><div class="field"><label>إجازات بدون أجر</label><input id="esUnpaidDays" inputmode="numeric"></div><div class="field"><label>أساس الأجر</label><select id="wageBaseES"><option value="total" selected>الإجمالي</option><option value="after">بعد التأمينات</option></select></div></div><div class="result"><strong>الإجمالي</strong><span id="esTotal">0.00</span></div><div class="err" id="err-es"></div></div></div>
+<div class="card" id="sec-vacation"><h2>رصيد الإجازات<span class="info-icon" data-info="vacation" title="معلومات إرشادية">ℹ️</span></h2><div class="body"><div class="row"><div class="field"><label>أول 5</label><input id="mvFirst5" inputmode="numeric" value="21"></div><div class="field"><label>بعد 5</label><input id="mvAfter5" inputmode="numeric" value="30"></div><div class="field"><label>المستحقة</label><input id="vacAccrued" readonly></div><div class="field"><label>المصروفة</label><input id="vacUsed" inputmode="decimal"></div><div class="field"><label>المتبقي</label><input id="vacRemaining" readonly></div><div class="field"><label>أساس الأجر</label><select id="wageBaseVAC"><option value="total" selected>الإجمالي</option><option value="after">بعد التأمينات</option></select></div></div><div class="result"><strong>التعويض</strong><span id="vacPayTotal">0.00</span></div><div class="err" id="err-vac"></div></div></div>
+<div class="card" id="sec-termination"><h2>فسخ العقد<span class="info-icon" data-info="termination" title="معلومات إرشادية">ℹ️</span></h2><div class="body"><div class="row"><div class="field"><label>نوع العقد</label><select id="termType"><option value="fixed" selected>محدد</option><option value="indef">غير محدد</option></select></div><div class="field"><label>بدء</label><input id="termRelStartRO" type="date" readonly></div><div class="field"><label>انتهاء العلاقة</label><input id="termRelEndRO" type="date" readonly></div><div class="field"><label>انتهاء العقد</label><input id="termContractEndRO" type="date" readonly></div><div class="field"><label>أساس الأجر</label><select id="wageBaseTerm"><option value="total" selected>الإجمالي</option><option value="after">بعد التأمينات</option></select></div></div>
+<div class="contract-clause"><div class="contract-clause-title">📜 شرط جزائي</div><div class="row"><div class="field"><label>وجود شرط</label><select id="termHasClause"><option value="no" selected>لا</option><option value="fixed_amount">مبلغ مقطوع</option><option value="months_wage">أشهر</option><option value="days_wage">أيام</option></select></div><div class="field" id="termClauseAmountField" style="display:none"><label>المبلغ</label><input id="termClauseAmount" inputmode="decimal"></div><div class="field" id="termClauseMonthsField" style="display:none"><label>الأشهر</label><input id="termClauseMonths" inputmode="decimal"></div><div class="field" id="termClauseDaysField" style="display:none"><label>الأيام</label><input id="termClauseDays" inputmode="numeric"></div></div></div>
+<div class="result"><strong>الإجمالي</strong><span id="termTotal">0.00</span></div><div class="err" id="err-term"></div></div></div>
+<div class="card" id="sec-overtime"><h2>الإضافي<span class="info-icon" data-info="overtime" title="معلومات إرشادية">ℹ️</span></h2><div class="body"><div class="row"><div class="field"><label>ساعات يومية</label><select id="otDayHours"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option selected>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select></div><div class="field"><label>عادية</label><input id="otHours" inputmode="decimal"></div><div class="field"><label>عطل</label><input id="otHolidayHours" inputmode="decimal"></div><div class="field"><label>سنوية</label><input id="otYearHours" inputmode="decimal"></div></div><div class="result"><strong>أجر الساعة</strong><span id="otHourRate">0.00</span></div><div class="result"><strong>عادية</strong><span id="otNormalTotal">0.00</span></div><div class="result"><strong>عطل</strong><span id="otHolidayTotal">0.00</span></div><div class="result"><strong>الإجمالي</strong><span id="otTotal">0.00</span></div><div class="err" id="err-ot"></div></div></div>
+<div class="card" id="sec-deduction"><h2>خصم الغياب<span class="info-icon" data-info="deduction" title="معلومات إرشادية">ℹ️</span></h2><div class="body"><div class="row"><div class="field"><label>ساعات يومية</label><select id="absDayHours"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option selected>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select></div><div class="field"><label>أيام</label><input id="absDays" inputmode="decimal"></div><div class="field"><label>ساعات تأخر</label><input id="absLateH" inputmode="decimal"></div><div class="field"><label>دقائق تأخر</label><input id="absLateM" inputmode="decimal"></div><div class="field"><label>أساس الأجر</label><select id="wageBaseAbs"><option value="total" selected>الإجمالي</option><option value="after">بعد التأمينات</option></select></div></div><div class="result"><strong>الإجمالي</strong><span id="absTotal">0.00</span></div><div class="err" id="err-abs"></div></div></div>
+<div class="card" id="sec-avg-wage"><h2>متوسط الأجر<span class="info-icon" data-info="avgwage" title="معلومات إرشادية">ℹ️</span></h2><div class="body"><div class="row">
+<div class="field"><label>1</label><input class="rent" id="r1" inputmode="decimal"></div><div class="field"><label>2</label><input class="rent" id="r2" inputmode="decimal"></div><div class="field"><label>3</label><input class="rent" id="r3" inputmode="decimal"></div><div class="field"><label>4</label><input class="rent" id="r4" inputmode="decimal"></div><div class="field"><label>5</label><input class="rent" id="r5" inputmode="decimal"></div><div class="field"><label>6</label><input class="rent" id="r6" inputmode="decimal"></div><div class="field"><label>7</label><input class="rent" id="r7" inputmode="decimal"></div><div class="field"><label>8</label><input class="rent" id="r8" inputmode="decimal"></div><div class="field"><label>9</label><input class="rent" id="r9" inputmode="decimal"></div><div class="field"><label>10</label><input class="rent" id="r10" inputmode="decimal"></div><div class="field"><label>11</label><input class="rent" id="r11" inputmode="decimal"></div><div class="field"><label>12</label><input class="rent" id="r12" inputmode="decimal"></div>
+</div><div class="result"><strong>المتوسط</strong><span id="rentAvg">0.00</span></div><div class="err" id="err-rent"></div></div></div>
+</div>
+<div style="height:14px"></div>
+<div class="card" id="sec-claims"><h2>صياغة المطالبات<span class="info-icon" data-info="claims" title="معلومات إرشادية">ℹ️</span></h2><div class="body"><div class="actions"><button class="btn btn-primary" onclick="copyAllClaims()">نسخ الكل</button><button class="btn btn-ghost" onclick="refreshClaims()">تحديث</button></div>
+<div class="field"><label>الأجور</label><textarea id="txt-claim-rl" readonly></textarea><div class="actions"><button class="btn-mini" onclick="copyOne('txt-claim-rl')">نسخ</button></div></div>
+<div class="field"><label>نهاية الخدمة</label><textarea id="txt-claim-es" readonly></textarea><div class="actions"><button class="btn-mini" onclick="copyOne('txt-claim-es')">نسخ</button></div></div>
+<div class="field"><label>الإجازات</label><textarea id="txt-claim-vac" readonly></textarea><div class="actions"><button class="btn-mini" onclick="copyOne('txt-claim-vac')">نسخ</button></div></div>
+<div class="field"><label>فسخ العقد</label><textarea id="txt-claim-term" readonly></textarea><div class="actions"><button class="btn-mini" onclick="copyOne('txt-claim-term')">نسخ</button></div></div>
+<div class="field"><label>الإضافي</label><textarea id="txt-claim-ot" readonly></textarea><div class="actions"><button class="btn-mini" onclick="copyOne('txt-claim-ot')">نسخ</button></div></div>
+<div class="field"><label>الإشعار</label><textarea id="txt-claim-ntc" readonly></textarea><div class="actions"><button class="btn-mini" onclick="copyOne('txt-claim-ntc')">نسخ</button></div></div>
+<div class="field"><label>الإجمالي</label><textarea id="txt-claim-grand" readonly></textarea><div class="actions"><button class="btn-mini" onclick="copyOne('txt-claim-grand')">نسخ</button></div></div>
+</div></div>
+
+<div style="height:14px"></div>
+
+<!-- 🤝 الصلح - محدَّث -->
+<div class="card" id="sec-settlement"><h2>🤝 الصلح<span class="info-icon" data-info="settlement" title="معلومات إرشادية">ℹ️</span></h2><div class="body">
+<div class="row">
+<div class="field"><label>هل تم صلح؟</label><select id="slhStatus"><option value="no" selected>لا</option><option value="full">صلح كلي</option><option value="partial">صلح جزئي</option><option value="drop">صلح مع إسقاط ما زاد</option></select></div>
+<div class="field"><label>تاريخ الصلح</label><input id="slhDate" type="text" placeholder="اختياري"></div>
+</div>
+<div class="row">
+<div class="field" style="flex:1 1 100%"><label>بنود الصلح (تظهر حرفيًا في المنطوق) *</label><textarea id="slhSummary" placeholder="مثال: تسلم المدعى عليها للمدعي مبلغ (3,000) ريال، وتصدر له تأشيرة خروج نهائي" style="min-height:80px"></textarea></div>
+</div>
+<small><b>مهم:</b> ما تكتبه في هذا الحقل يُدرج <b>حرفيًا</b> في منطوق الصلح. اكتب البنود كما تريد أن تظهر في الحكم (يبدأ المنطوق بـ «ثبت لدي هذا الصلح بأن...»).</small>
+<div class="err" id="err-slh"></div>
+</div></div>
+
+<!-- 📜 شهادة الخدمة -->
+<div class="card" id="sec-service-cert"><h2>📜 شهادة الخدمة<span class="info-icon" data-info="servicecert" title="معلومات إرشادية">ℹ️</span></h2><div class="body">
+<div class="row">
+<div class="field"><label>يستحق شهادة خدمة؟</label><select id="svcStatus"><option value="no" selected>لا</option><option value="yes">نعم</option></select></div>
+<div class="field"><label>المهنة</label><input id="svcJob" placeholder="مثال: مندوب مبيعات"></div>
+<div class="field"><label>من تاريخ</label><input id="svcStart" type="date" readonly></div>
+<div class="field"><label>إلى تاريخ</label><input id="svcEnd" type="date" readonly></div>
+<div class="field"><label>الأجر</label><input id="svcWage" readonly></div>
+</div>
+<small>الصياغة: «إلزام المدعى عليها أن تسلم للمدعي شهادة عن مدة خدمته من ... إلى ... بأجر ... وبمهنة ...».</small>
+<div class="err" id="err-svc"></div>
+</div></div>
+
+<div style="height:14px"></div>
+
+<div class="card" id="sec-reasons"><h2>⚖️ جمل التسبيب<span class="info-icon" data-info="reasons" title="معلومات إرشادية">ℹ️</span></h2><div class="body">
+<div class="reason-toolbar"><div class="reason-toolbar-title">🎯 المطوّلة (SYL-3)</div><button class="btn btn-primary" id="btnCopyAllReasons">📋 نسخ الكل</button><button class="btn btn-ghost" id="btnRefreshReasons">🔄 تحديث</button><div class="reason-note">نص نظامي ← واقعة ← نتيجة. لكل بند تبويبان: قبول ورفض.</div></div>
+<div class="reason-block" id="rb-rl"><div class="reason-header"><div class="reason-title">1️⃣ الأجور <span class="reason-status neutral" id="rs-rl">—</span></div></div><div class="reason-tabs"><button class="reason-tab accept-tab active" data-target="rb-rl-a">✓ قبول</button><button class="reason-tab reject-tab" data-target="rb-rl-r">✗ رفض</button></div><div class="reason-body"><div class="reason-pane active" id="rb-rl-a"><textarea class="reason-textarea" id="rt-rl-a" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-rl-a')">📋</button><button class="btn-mini ghost" onclick="editReason('rt-rl-a')">✏️</button></div></div><div class="reason-pane" id="rb-rl-r"><textarea class="reason-textarea" id="rt-rl-r" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-rl-r')">📋</button><button class="btn-mini ghost" onclick="editReason('rt-rl-r')">✏️</button></div></div></div></div>
+<div class="reason-block" id="rb-es"><div class="reason-header"><div class="reason-title">2️⃣ نهاية الخدمة <span class="reason-status neutral" id="rs-es">—</span></div></div><div class="reason-tabs"><button class="reason-tab accept-tab active" data-target="rb-es-a">✓ قبول</button><button class="reason-tab reject-tab" data-target="rb-es-r">✗ رفض</button></div><div class="reason-body"><div class="reason-pane active" id="rb-es-a"><textarea class="reason-textarea" id="rt-es-a" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-es-a')">📋</button><button class="btn-mini ghost" onclick="editReason('rt-es-a')">✏️</button></div></div><div class="reason-pane" id="rb-es-r"><textarea class="reason-textarea" id="rt-es-r" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-es-r')">📋</button><button class="btn-mini ghost" onclick="editReason('rt-es-r')">✏️</button></div></div></div></div>
+<div class="reason-block" id="rb-vac"><div class="reason-header"><div class="reason-title">3️⃣ الإجازات <span class="reason-status neutral" id="rs-vac">—</span></div></div><div class="reason-tabs"><button class="reason-tab accept-tab active" data-target="rb-vac-a">✓ قبول</button><button class="reason-tab reject-tab" data-target="rb-vac-r">✗ رفض</button></div><div class="reason-body"><div class="reason-pane active" id="rb-vac-a"><textarea class="reason-textarea" id="rt-vac-a" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-vac-a')">📋</button><button class="btn-mini ghost" onclick="editReason('rt-vac-a')">✏️</button></div></div><div class="reason-pane" id="rb-vac-r"><textarea class="reason-textarea" id="rt-vac-r" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-vac-r')">📋</button><button class="btn-mini ghost" onclick="editReason('rt-vac-r')">✏️</button></div></div></div></div>
+<div class="reason-block" id="rb-term"><div class="reason-header"><div class="reason-title">4️⃣ فسخ العقد <span class="reason-status neutral" id="rs-term">—</span></div></div><div class="reason-tabs"><button class="reason-tab accept-tab active" data-target="rb-term-a">✓ قبول</button><button class="reason-tab reject-tab" data-target="rb-term-r">✗ رفض</button></div><div class="reason-body"><div class="reason-pane active" id="rb-term-a"><textarea class="reason-textarea" id="rt-term-a" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-term-a')">📋</button><button class="btn-mini ghost" onclick="editReason('rt-term-a')">✏️</button></div></div><div class="reason-pane" id="rb-term-r"><textarea class="reason-textarea" id="rt-term-r" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-term-r')">📋</button><button class="btn-mini ghost" onclick="editReason('rt-term-r')">✏️</button></div></div></div></div>
+<div class="reason-block" id="rb-ot"><div class="reason-header"><div class="reason-title">5️⃣ الإضافي <span class="reason-status neutral" id="rs-ot">—</span></div></div><div class="reason-tabs"><button class="reason-tab accept-tab active" data-target="rb-ot-a">✓ قبول</button><button class="reason-tab reject-tab" data-target="rb-ot-r">✗ رفض</button></div><div class="reason-body"><div class="reason-pane active" id="rb-ot-a"><textarea class="reason-textarea" id="rt-ot-a" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-ot-a')">📋</button><button class="btn-mini ghost" onclick="editReason('rt-ot-a')">✏️</button></div></div><div class="reason-pane" id="rb-ot-r"><textarea class="reason-textarea" id="rt-ot-r" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-ot-r')">📋</button><button class="btn-mini ghost" onclick="editReason('rt-ot-r')">✏️</button></div></div></div></div>
+<div class="reason-block" id="rb-ntc"><div class="reason-header"><div class="reason-title">6️⃣ الإشعار <span class="reason-status neutral" id="rs-ntc">—</span></div></div><div class="reason-tabs"><button class="reason-tab accept-tab active" data-target="rb-ntc-a">✓ قبول</button><button class="reason-tab reject-tab" data-target="rb-ntc-r">✗ رفض</button></div><div class="reason-body"><div class="reason-pane active" id="rb-ntc-a"><textarea class="reason-textarea" id="rt-ntc-a" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-ntc-a')">📋</button><button class="btn-mini ghost" onclick="editReason('rt-ntc-a')">✏️</button></div></div><div class="reason-pane" id="rb-ntc-r"><textarea class="reason-textarea" id="rt-ntc-r" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-ntc-r')">📋</button><button class="btn-mini ghost" onclick="editReason('rt-ntc-r')">✏️</button></div></div></div></div>
+<div class="reason-block" id="rb-lim"><div class="reason-header"><div class="reason-title">7️⃣ التقادم <span class="reason-status neutral" id="rs-lim">—</span></div></div><div class="reason-tabs"><button class="reason-tab accept-tab active" data-target="rb-lim-a">✓ عدم التقادم</button><button class="reason-tab reject-tab" data-target="rb-lim-r">✗ التقادم</button></div><div class="reason-body"><div class="reason-pane active" id="rb-lim-a"><textarea class="reason-textarea" id="rt-lim-a" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-lim-a')">📋</button><button class="btn-mini ghost" onclick="editReason('rt-lim-a')">✏️</button></div></div><div class="reason-pane" id="rb-lim-r"><textarea class="reason-textarea" id="rt-lim-r" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-lim-r')">📋</button><button class="btn-mini ghost" onclick="editReason('rt-lim-r')">✏️</button></div></div></div></div>
+<div class="reason-block" id="rb-slh"><div class="reason-header"><div class="reason-title">🤝 الصلح (SLH-70/3) <span class="reason-status neutral" id="rs-slh">—</span></div></div><div class="reason-body"><textarea class="reason-textarea" id="rt-slh-a" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-slh-a')">📋 نسخ التسبيب</button><button class="btn-mini ghost" onclick="editReason('rt-slh-a')">✏️</button></div>
+<div class="verdict-block"><div class="verdict-title">📢 منطوق الصلح</div><textarea class="verdict-textarea" id="rt-slh-v" readonly></textarea><div class="reason-actions" style="margin-top:6px"><button class="btn-mini" onclick="copyReason('rt-slh-v')">📋 نسخ المنطوق</button><button class="btn-mini ghost" onclick="editReason('rt-slh-v')">✏️</button></div></div>
+</div></div>
+<div class="reason-block" id="rb-svc"><div class="reason-header"><div class="reason-title">📜 شهادة الخدمة <span class="reason-status neutral" id="rs-svc">—</span></div></div><div class="reason-body"><textarea class="reason-textarea" id="rt-svc-a" readonly></textarea><div class="reason-actions"><button class="btn-mini" onclick="copyReason('rt-svc-a')">📋 نسخ التسبيب</button><button class="btn-mini ghost" onclick="editReason('rt-svc-a')">✏️</button></div>
+<div class="verdict-block"><div class="verdict-title">📢 منطوق شهادة الخدمة</div><textarea class="verdict-textarea" id="rt-svc-v" readonly></textarea><div class="reason-actions" style="margin-top:6px"><button class="btn-mini" onclick="copyReason('rt-svc-v')">📋 نسخ المنطوق</button><button class="btn-mini ghost" onclick="editReason('rt-svc-v')">✏️</button></div></div>
+</div></div>
+
+<div class="verdict-block" style="margin-top:20px;background:linear-gradient(135deg,rgba(192,176,90,.15),rgba(24,120,96,.08));border-color:var(--accent);border-width:3px">
+<div class="verdict-title" style="color:var(--text);font-size:16px">📢 المنطوق الشامل للحكم</div>
+<textarea class="verdict-textarea" id="rt-all-verdict" readonly style="min-height:220px;font-size:16px"></textarea>
+<div class="reason-actions" style="margin-top:8px"><button class="btn btn-primary" onclick="copyReason('rt-all-verdict')">📋 نسخ كامل</button><button class="btn btn-ghost" onclick="editReason('rt-all-verdict')">✏️</button><button class="btn btn-ghost" onclick="buildAllReasons();showToast('✓')">🔄</button></div>
+</div>
+</div></div>
+
+<div style="height:14px"></div>
+<div class="summary" id="sec-summary"><h3>الملخص النهائي</h3><div class="sum-grid"><div class="sum-item"><b>الأجور</b><i id="sum-rl">0.00</i></div><div class="sum-item"><b>نهاية الخدمة</b><i id="sum-es">0.00</i></div><div class="sum-item"><b>الإجازات</b><i id="sum-vac">0.00</i></div><div class="sum-item"><b>فسخ العقد</b><i id="sum-term">0.00</i></div><div class="sum-item"><b>الإضافي</b><i id="sum-ot">0.00</i></div><div class="sum-item"><b id="sum-ntc-label">الإشعار</b><i id="sum-ntc">0.00</i></div><div class="sum-item"><b>خصم الغياب</b><i id="sum-abs">0.00</i></div><div class="sum-item"><b>متوسط الأجر</b><i id="sum-rent">0.00</i></div><div class="sum-item" style="background:rgba(192,176,90,.25)"><b id="sum-grand-label">الإجمالي</b><i id="sum-grand">0.00</i></div></div></div><footer>© 2026</footer></div>
+
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<aside class="drawer" id="drawer"><div class="drawer-header"><h3>📑 الأقسام</h3><button class="hbtn" id="btnDrawerClose">×</button></div><div class="drawer-search"><input type="text" id="drawerSearch" placeholder="🔍"></div><div class="drawer-body">
+<div class="drawer-group"><div class="drawer-group-title">📋 البيانات</div><a href="#sec-general" class="drawer-link" data-name="عامة">البيانات العامة</a><a href="#sec-dateconv" class="drawer-link" data-name="تحويل">تحويل التاريخ</a></div>
+<div class="drawer-group"><div class="drawer-group-title">🧮 الحسابات</div><a href="#sec-probation" class="drawer-link" data-name="تجربة">التجربة</a><a href="#sec-limitation" class="drawer-link" data-name="تقادم">التقادم</a><a href="#sec-notice" class="drawer-link" data-name="إشعار">الإشعار</a><a href="#sec-late-wages" class="drawer-link" data-name="أجور">الأجور</a><a href="#sec-eosb" class="drawer-link" data-name="نهاية">نهاية الخدمة</a><a href="#sec-vacation" class="drawer-link" data-name="إجازات">الإجازات</a><a href="#sec-termination" class="drawer-link" data-name="فسخ">فسخ العقد</a><a href="#sec-overtime" class="drawer-link" data-name="إضافي">الإضافي</a><a href="#sec-deduction" class="drawer-link" data-name="غياب">الغياب</a><a href="#sec-avg-wage" class="drawer-link" data-name="متوسط">متوسط الأجر</a></div>
+<div class="drawer-group"><div class="drawer-group-title">📝 المخرجات</div><a href="#sec-claims" class="drawer-link" data-name="صياغة">الصياغة</a><a href="#sec-settlement" class="drawer-link" data-name="صلح">🤝 الصلح</a><a href="#sec-service-cert" class="drawer-link" data-name="شهادة">📜 شهادة الخدمة</a><a href="#sec-reasons" class="drawer-link" data-name="تسبيب">⚖️ التسبيب</a><a href="#sec-summary" class="drawer-link" data-name="ملخص">الملخص</a></div>
+</div><div class="drawer-shortcuts"><b>اختصارات:</b><br><kbd>Alt+M</kbd>·<kbd>Alt+C</kbd>·<kbd>Alt+R</kbd>·<kbd>Alt+P</kbd>·<kbd>Ctrl+Z/Y</kbd></div></aside>
+
+<div class="drawer-overlay" id="casesOverlay"></div>
+<aside class="drawer" id="casesDrawer"><div class="drawer-header"><h3>📁 القضايا</h3><button class="hbtn" id="btnCasesClose">×</button></div><div class="case-toolbar"><button class="btn btn-primary" id="btnSaveCase">💾 حفظ</button><div class="case-toolbar-row"><button class="btn btn-ghost" id="btnExportCase">📤 تصدير</button><button class="btn btn-ghost" id="btnImportCase">📥 استيراد</button></div><input type="file" id="importFileInput" accept=".json" style="display:none"></div><div class="drawer-search"><input type="text" id="casesSearch" placeholder="🔍"></div><div class="drawer-body"><div class="case-list" id="casesList"></div></div></aside>
+
+<div class="modal-overlay" id="modalOverlay"><div class="modal"><h4 id="modalTitle">إدخال</h4><p id="modalDesc">القيمة:</p><input type="text" id="modalInput"><div class="modal-actions"><button class="btn btn-ghost" id="modalCancel">إلغاء</button><button class="btn btn-primary" id="modalOk">موافق</button></div></div></div>
+
+<div class="info-modal-overlay" id="infoModalOverlay"><div class="info-modal"><div class="info-modal-header"><div class="info-modal-title"><span>ℹ️</span><span id="infoModalTitle">معلومات إرشادية</span></div><button class="info-modal-close" id="infoModalClose" title="إغلاق (Esc)">×</button></div><div class="info-modal-body" id="infoModalBody"></div></div></div>
+<div class="toast" id="toast">تم النسخ</div>
+<script src="https://unpkg.com/@umalqura/core@0.0.7/dist/umalqura.min.js"></script>
+<script>
+function normalizeDigitsAny(str){if(!str)return'';const map={'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};return String(str).replace(/[٠-٩]/g,ch=>map[ch]??ch)}
+function toNumber(v){if(v==null)return 0;let s=normalizeDigitsAny(String(v).trim());if(!s)return 0;s=s.replace(/\s/g,'').replace(/[٬،,]/g,'').replace(/٫/g,'.').replace(/[^0-9.\-]/g,'');const parts=s.split('.');if(parts.length>2)s=parts.shift()+'.'+parts.join('');const n=Number(s);return Number.isFinite(n)?n:0}
+function money(n){const x=(isNaN(n)||!isFinite(n))?0:n;return x.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function setErr(id,msg,show){const el=document.getElementById(id);if(el)el.textContent=show?(msg||''):''}
+function clearErrAll(){['err-global','err-dateconv','err-lim','err-prob','err-rl','err-es','err-vac','err-term','err-abs','err-rent','err-ot','err-ntc','err-slh','err-svc'].forEach(id=>setErr(id,'',false))}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg||'تم';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1400)}
+function pad2(n){return String(n).padStart(2,'0')}
+function isLeapYear(y){return(y%4===0&&y%100!==0)||(y%400===0)}
+function daysInMonth(y,m){const md=[31,isLeapYear(y)?29:28,31,30,31,30,31,31,30,31,30,31];return md[m-1]||0}
+function parseFlexibleGregorianToISO(input){if(!input)return null;let s=normalizeDigitsAny(input).trim();s=s.replace(/\s*(?:م|هـ|هجري|ميلادي|ميلادية)\s*$/g,'').trim();s=s.replace(/^(?:تاريخ|بتاريخ|يوم|في|من|شهر|عام|سنة|إلى|الى|حتى|وحتى)\s+/g,'').trim();s=s.replace(/[.\/]/g,'-').replace(/\s+/g,'-').replace(/--+/g,'-').replace(/^-|-$/g,'');const p=s.split('-').filter(Boolean);if(p.length!==3)return null;const a=+p[0],b=+p[1],c=+p[2];if([a,b,c].some(n=>!Number.isFinite(n)))return null;let y,m,d;if(String(p[0]).length===4||a>999){y=a;m=b;d=c}else{d=a;m=b;y=c}if(y<1600||y>2500||m<1||m>12||d<1||d>daysInMonth(y,m))return null;return `${y}-${pad2(m)}-${pad2(d)}`}
+function normalizeDateField(id){const el=document.getElementById(id);if(!el)return'';const raw=(el.value||'').trim();if(!raw)return'';const iso=parseFlexibleGregorianToISO(raw);if(iso)el.value=iso;return iso||null}
+function parseDateSafe(ymd){if(!ymd)return null;const m=String(ymd).trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!m)return null;const y=+m[1],mo=+m[2],d=+m[3];const dt=new Date(y,mo-1,d);if(dt.getFullYear()!==y||dt.getMonth()+1!==mo||dt.getDate()!==d)return null;return dt}
+function fmtDate(ymd){const d=parseDateSafe(ymd);return d?`${d.getFullYear()}/${pad2(d.getMonth()+1)}/${pad2(d.getDate())}`:(ymd||'')}
+function addDays(dateStr,days){const d=parseDateSafe(dateStr);if(!d)return'';d.setDate(d.getDate()+days);return`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`}
+function diffDays360Inclusive(s,e){const a=parseDateSafe(s),b=parseDateSafe(e);if(!a||!b||b<a)return null;const months=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()+1-(a.getMonth()+1));return Math.max(0,months*30+(Math.min(b.getDate(),30)-Math.min(a.getDate(),30))+1)}
+function diffDaysActual(s,e){const a=parseDateSafe(s),b=parseDateSafe(e);if(!a||!b||b<a)return null;return Math.round((Date.UTC(b.getFullYear(),b.getMonth(),b.getDate())-Date.UTC(a.getFullYear(),a.getMonth(),a.getDate()))/86400000)+1}
+function inRange(d,s,e){const dd=parseDateSafe(d),ss=parseDateSafe(s),ee=parseDateSafe(e);return dd&&ss&&ee&&dd>=ss&&dd<=ee}
+function addH(map,date,name){if(!date)return;if(!map[date])map[date]=new Set();map[date].add(name)}
+function listHolidays(s,e){const map={};const sd=parseDateSafe(s),ed=parseDateSafe(e);if(!sd||!ed||ed<sd)return[];for(let y=sd.getFullYear()-1;y<=ed.getFullYear()+1;y++){addH(map,`${y}-02-22`,'يوم التأسيس');addH(map,`${y}-09-23`,'اليوم الوطني')}if(typeof umalqura==='function'){try{const hs=umalqura(new Date(s+'T00:00:00')).hy-1,he=umalqura(new Date(e+'T00:00:00')).hy+1;for(let hy=hs;hy<=he;hy++){const r29=umalqura(hy,9,29).date;const r=`${r29.getFullYear()}-${pad2(r29.getMonth()+1)}-${pad2(r29.getDate())}`;for(let i=1;i<=4;i++)addH(map,addDays(r,i),'عيد الفطر');const ar=umalqura(hy,12,9).date;const ai=`${ar.getFullYear()}-${pad2(ar.getMonth()+1)}-${pad2(ar.getDate())}`;for(let i=0;i<4;i++)addH(map,addDays(ai,i),'عيد الأضحى')}}catch(e){}}return Object.keys(map).filter(d=>inRange(d,s,e)).sort().map(d=>({date:d,name:Array.from(map[d]).join(' + ')}))}
+function calcLimitation(){const last=normalizeDateField('limLastDay'),claim=normalizeDateField('limClaimDay');if(!last||!claim){document.getElementById('limDays').textContent='—';document.getElementById('limMsg').textContent='—';window.__lastDetails=window.__lastDetails||{};window.__lastDetails.lim=null;return null}const days=diffDaysActual(addDays(last,1),claim);if(days===null)return null;document.getElementById('limDays').textContent=String(days);const passed=days>360;document.getElementById('limMsg').textContent=passed?'تظهر مدة عدم القبول':'لا يظهر مضي مدة عدم القبول';window.__lastDetails.lim={lastDay:last,claimDay:claim,days,passed};return{days,passed}}
+function parseHijri(str){if(!str)return null;const s=normalizeDigitsAny(str).trim().replace(/[.\/\s]+/g,'-');const p=s.split('-').filter(Boolean);if(p.length!==3)return null;const a=+p[0],b=+p[1],c=+p[2];function ok(hy,hm,hd){return hy>=1000&&hy<=2000&&hm>=1&&hm<=12&&hd>=1&&hd<=30?{hy,hm,hd}:null}return(String(p[0]).length===4?ok(a,b,c):null)||(String(p[2]).length===4?ok(c,b,a):null)||ok(a,b,c)}
+function updateDateConverters(){const gIso=normalizeDateField('g2hDate');if(gIso){try{const uq=umalqura(new Date(gIso+'T00:00:00'));document.getElementById('g2hHijri').value=`${uq.hy}-${pad2(uq.hm)}-${pad2(uq.hd)} هـ`}catch(e){document.getElementById('g2hHijri').value=''}}else document.getElementById('g2hHijri').value='';const hStr=(document.getElementById('h2gHijri').value||'').trim();if(hStr){const h=parseHijri(hStr);if(h){try{const g=umalqura(h.hy,h.hm,h.hd).date;document.getElementById('h2gDate').value=`${g.getFullYear()}-${pad2(g.getMonth()+1)}-${pad2(g.getDate())}`}catch(e){}}}else document.getElementById('h2gDate').value=''}
+function wageMonthly(b){const t=toNumber(document.getElementById('total').value),a=toNumber(document.getElementById('after').value);return b==='after'?a:t}
+function wageDaily(b){return wageMonthly(b)/30}
+function wageHourly(b,h){h=toNumber(h);return h?wageDaily(b)/h:0}
+function toggleRL(){const m=document.getElementById('rlMode').value;document.getElementById('rl-date').style.display=m==='date'?'':'none';document.getElementById('rl-dur').style.display=m==='dur'?'':'none'}
+function syncDates(){const rs=document.getElementById('relStart').value,re=document.getElementById('relEnd').value,ce=document.getElementById('contractEnd').value;document.getElementById('esStart').value=rs||'';document.getElementById('esEnd').value=re||'';document.getElementById('termRelStartRO').value=rs||'';document.getElementById('termRelEndRO').value=re||'';document.getElementById('termContractEndRO').value=ce||''}
+function toggleTermClause(){const v=document.getElementById('termHasClause').value;document.getElementById('termClauseAmountField').style.display=v==='fixed_amount'?'':'none';document.getElementById('termClauseMonthsField').style.display=v==='months_wage'?'':'none';document.getElementById('termClauseDaysField').style.display=v==='days_wage'?'':'none'}
+function calcProbation(){const start=document.getElementById('relStart').value,end=document.getElementById('relEnd').value,ag=toNumber(document.getElementById('probDays').value),sick=toNumber(document.getElementById('probSick').value),other=toNumber(document.getElementById('probOtherExcluded').value);const manual=sick+other;document.getElementById('probManualExcludedTotal').textContent=String(manual);window.__probationWithin=false;window.__lastDetails=window.__lastDetails||{};window.__lastDetails.prob=null;if(!ag){['probOfficialTotal','probExcludedTotal'].forEach(id=>document.getElementById(id).textContent='0');document.getElementById('probEndDate').textContent='—';document.getElementById('probActualDays').textContent='—';document.getElementById('probResult').textContent='—';return}if(!start||!end)return;const eff=Math.min(ag,180);let end2=addDays(start,eff+manual-1),prev='',hdays=[];for(let i=0;i<10&&end2&&end2!==prev;i++){prev=end2;hdays=listHolidays(start,end2);end2=addDays(start,eff+manual+hdays.length-1)}hdays=listHolidays(start,end2);const off=hdays.length,exc=manual+off,pe=end2,ac=diffDaysActual(start,end);if(ac===null)return;const within=parseDateSafe(end)<=parseDateSafe(pe);window.__probationWithin=within;document.getElementById('probOfficialTotal').textContent=String(off);document.getElementById('probExcludedTotal').textContent=String(exc);document.getElementById('probEndDate').textContent=fmtDate(pe);document.getElementById('probActualDays').textContent=String(ac);document.getElementById('probResult').textContent=within?'أُنهي في التجربة':'أُنهي بعد التجربة';document.getElementById('probHolidayList').value=hdays.length?hdays.map(x=>`${fmtDate(x.date)} - ${x.name}`).join('\n'):'';window.__lastDetails.prob={start,end,effectiveAgreedDays:eff,manualExcluded:manual,officialExcluded:off,probationEnd:pe,actualDays:ac,within}}
+function arWords(n){n=Math.floor(n);if(n===0)return'';const ones=['','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة'],tens=['','عشرة','عشرون','ثلاثون','أربعون','خمسون','ستون','سبعون','ثمانون','تسعون'],teens=['عشرة','أحد عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'],hs=['','مائة','مائتان','ثلاثمائة','أربعمائة','خمسمائة','ستمائة','سبعمائة','ثمانمائة','تسعمائة'];const h=Math.floor(n/100),r=n%100,p=[];if(h)p.push(hs[h]);if(r){if(r<10)p.push(ones[r]);else if(r<20)p.push(teens[r-10]);else{const t=Math.floor(r/10),o=r%10;if(o)p.push(ones[o]);p.push(tens[t])}}return p.filter(Boolean).join(' و ')}
+function scale(v,s){const f={1:['ألف','ألفان','آلاف'],2:['مليون','مليونان','ملايين'],3:['مليار','ملياران','مليارات']}[s];if(!f)return'';if(v===1)return f[0];if(v===2)return f[1];if(v>=3&&v<=10)return f[2];return f[0]}
+function numToWords(a){a=Math.abs(isFinite(a)?a:0);const rd=Math.round(a*100)/100,r=Math.floor(rd),hl=Math.round((rd-r)*100);function w(n){if(n===0)return'صفر';const c=[];while(n>0){c.push(n%1000);n=Math.floor(n/1000)}const o=[];for(let i=c.length-1;i>=0;i--){const v=c[i];if(!v)continue;if(i===0)o.push(arWords(v));else o.push((v===1||v===2)?scale(v,i):arWords(v)+' '+scale(v,i))}return o.join(' و ')}return w(r)+' ريال سعودي'+(hl>0?' و '+w(hl)+' هللة':'')}
+function getNames(){const p=(document.getElementById('plaintiff').value||'').trim(),d=(document.getElementById('defendant').value||'').trim();return{plaintiff:p||'المدعي',defendant:d||'المدعى عليه'}}
+function claimSentence(a,r){const{plaintiff,defendant}=getNames();const n=Math.round((a||0)*100)/100;if(n<=0)return'';return`إلزام المدعى عليه (${defendant}) أن يسلم للمدعي (${plaintiff}) مبلغًا قدره (${money(n)}) (${numToWords(n)}) فقط لا غير، وذلك ${r}.`}
+function claimReverse(a,r){const{plaintiff,defendant}=getNames();const n=Math.round((a||0)*100)/100;if(n<=0)return'';return`إلزام المدعى عليه (${defendant}) بأن يدفع للمدعي (${plaintiff}) مبلغًا قدره (${money(n)}) (${numToWords(n)}) فقط لا غير، وذلك ${r}.`}
+function reasonRL(d){if(!d)return'مقابل الأجور المتأخرة';return d.mode==='date'?`مقابل الأجور المتأخرة من (${fmtDate(d.from)}) إلى (${fmtDate(d.to)}) بإجمالي (${d.days360}) يومًا`:`مقابل الأجور المتأخرة عن (${d.months}) شهرًا و(${d.days}) يومًا`}
+function reasonES(d){if(!d)return'مقابل مكافأة نهاية الخدمة';return`مقابل مكافأة نهاية الخدمة ${d.method==='85'?'م85':'م84'}`}
+function reasonVAC(d){if(!d)return'مقابل رصيد الإجازات';return`مقابل رصيد الإجازات، المتبقي (${d.remaining}) يومًا`}
+function reasonTERM(d){if(!d)return'مقابل التعويض عن فسخ العقد';if(d.clauseType&&d.clauseType!=='no')return`مقابل التعويض عن فسخ العقد استنادًا إلى الشرط الجزائي`;return`مقابل التعويض عن فسخ العقد`}
+function reasonOT(d){if(!d)return'مقابل الساعات الإضافية';return`مقابل الساعات الإضافية بأجر ساعة (${money(d.rate)})`}
+function reasonNTC(d){if(!d)return'مقابل بدل الإشعار';return`مقابل بدل الإشعار (${d.appliedDays} يومًا)`}
+function refreshClaims(){const R=window.__lastResults||{},D=window.__lastDetails||{};document.getElementById('txt-claim-rl').value=claimSentence(R.rl,reasonRL(D.rl));document.getElementById('txt-claim-es').value=claimSentence(R.es,reasonES(D.es));document.getElementById('txt-claim-vac').value=claimSentence(R.vac,reasonVAC(D.vac));document.getElementById('txt-claim-term').value=claimSentence(R.term,reasonTERM(D.term));document.getElementById('txt-claim-ot').value=claimSentence(R.ot,reasonOT(D.ot));const ntcP=D.ntc&&D.ntc.party==='employer';document.getElementById('txt-claim-ntc').value=ntcP?claimReverse(R.ntc,reasonNTC(D.ntc)):claimSentence(R.ntc,reasonNTC(D.ntc));const{plaintiff,defendant}=getNames();document.getElementById('txt-claim-grand').value=R.grand>0?`إلزام (${defendant}) أن يسلم (${plaintiff}) مبلغًا قدره (${money(R.grand)}) (${numToWords(R.grand)}) عن مجموع المطالبات.`:''}
+async function copyText(t){try{await navigator.clipboard.writeText(t);showToast('✓ نسخ')}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();showToast('✓ نسخ')}}
+function copyOne(id){const t=(document.getElementById(id).value||'').trim();if(!t)return showToast('فارغ');copyText(t)}
+function clearOne(id){document.getElementById(id).value=''}
+function copyAllClaims(){const ids=['txt-claim-rl','txt-claim-es','txt-claim-vac','txt-claim-term','txt-claim-ot','txt-claim-ntc','txt-claim-grand'],ord=['أولًا','ثانيًا','ثالثًا','رابعًا','خامسًا','سادسًا','سابعًا'];const t=ids.map(id=>(document.getElementById(id).value||'').trim()).filter(Boolean);if(!t.length)return;copyText(t.map((x,i)=>`${ord[i]}: ${x}`).join('\n\n'))}
+function updateTotal(){document.getElementById('total').value=money(toNumber(document.getElementById('basic').value)+toNumber(document.getElementById('allow').value))}
+function calcRentLate(){const dw=wageDaily('after'),m=document.getElementById('rlMode').value;let days=0,det={mode:m};if(dw<=0){document.getElementById('rlTotal').textContent=money(0);window.__lastDetails.rl=null;return 0}if(m==='date'){const from=document.getElementById('rlFrom').value,to=document.getElementById('rlTo').value;if(!from||!to){document.getElementById('rlTotal').textContent=money(0);window.__lastDetails.rl=null;return 0}days=diffDays360Inclusive(from,to);if(!days){window.__lastDetails.rl=null;return 0}Object.assign(det,{from,to,days360:days})}else{const mo=toNumber(document.getElementById('rlMonths').value),d=toNumber(document.getElementById('rlDays').value);days=mo*30+d;if(days<=0)return 0;Object.assign(det,{months:mo,days:d,days360:days})}const t=dw*days;document.getElementById('rlTotal').textContent=money(t);window.__lastDetails.rl=det;return t}
+function eosbFull(mw,y){return y<=0?0:(Math.min(y,5)*.5+Math.max(0,y-5))*mw}
+function calcEndService(){if(window.__probationWithin){document.getElementById('esTotal').textContent=money(0);window.__lastDetails.es=null;return 0}const m=document.getElementById('esMethod').value,b=document.getElementById('wageBaseES').value,mw=wageMonthly(b),s=document.getElementById('esStart').value,e=document.getElementById('esEnd').value;if(mw<=0||!s||!e){document.getElementById('esTotal').textContent=money(0);window.__lastDetails.es=null;return 0}const td=diffDays360Inclusive(s,e);if(!td)return 0;const u=toNumber(document.getElementById('esUnpaidDays').value),nd=Math.max(0,td-u),y=Math.round(nd/360*10000)/10000;let f=eosbFull(mw,y),f85=1;if(m==='85'){f85=y<2?0:y<=5?1/3:y<10?2/3:1;f*=f85}document.getElementById('esTotal').textContent=money(f);window.__lastDetails.es={start:s,end:e,totalDays360:td,unpaid:u,netDays360:nd,years:y,method:m,monthlyWage:mw,wageBase:b,m85factor:f85,full5Portion:Math.min(y,5)*.5*mw,after5Portion:Math.max(0,y-5)*mw};return f}
+function calcVacation(){const s=document.getElementById('relStart').value,e=document.getElementById('relEnd').value,f5=toNumber(document.getElementById('mvFirst5').value),a5=toNumber(document.getElementById('mvAfter5').value);const td=diffDays360Inclusive(s,e);if(td===null){document.getElementById('vacPayTotal').textContent=money(0);window.__lastDetails.vac=null;return 0}const y=td/360;const ac=Math.round((Math.min(y,5)*f5+Math.max(0,y-5)*a5)*100)/100;document.getElementById('vacAccrued').value=ac;const u=toNumber(document.getElementById('vacUsed').value),r=Math.max(0,ac-u);document.getElementById('vacRemaining').value=Math.round(r*100)/100;const b=document.getElementById('wageBaseVAC').value,dw=wageDaily(b),yy=Math.round(td/360*10000)/10000;if(dw<=0)return 0;const t=r*dw;document.getElementById('vacPayTotal').textContent=money(t);window.__lastDetails.vac={start:s,end:e,days360:td,years:yy,accrued:ac,used:u,remaining:r,dailyWage:dw,first5:f5,after5:a5,wageBase:b};return t}
+function calcTermination(){if(window.__probationWithin){document.getElementById('termTotal').textContent=money(0);window.__lastDetails.term=null;return 0}const type=document.getElementById('termType').value,b=document.getElementById('wageBaseTerm').value,mw=wageMonthly(b),rs=document.getElementById('relStart').value,re=document.getElementById('relEnd').value,ce=document.getElementById('contractEnd').value,ct=document.getElementById('termHasClause').value;if(mw<=0||!rs||!re){document.getElementById('termTotal').textContent=money(0);window.__lastDetails.term=null;return 0}if(ct!=='no'){let tot=0,val=0;if(ct==='fixed_amount'){val=toNumber(document.getElementById('termClauseAmount').value);tot=val}else if(ct==='months_wage'){val=toNumber(document.getElementById('termClauseMonths').value);tot=val*mw}else{val=toNumber(document.getElementById('termClauseDays').value);tot=val*(mw/30)}if(val<=0){document.getElementById('termTotal').textContent=money(0);window.__lastDetails.term=null;return 0}const a2m=false,fin=tot;document.getElementById('termTotal').textContent=money(fin);window.__lastDetails.term={type,from:type==='fixed'?addDays(re,1):rs,to:type==='fixed'?ce:re,monthlyWage:mw,raw:tot,comp:fin,applied2Min:a2m,wageBase:b,clauseType:ct,clauseValue:val,clauseTotal:tot};return fin}if(type==='fixed'){if(!ce)return 0;const from=addDays(re,1),to=ce,d=diffDays360Inclusive(from,to);if(!d)return 0;const mo=Math.round(d/30*10000)/10000,raw=mo*mw,comp=Math.max(raw,2*mw),a2m=raw<2*mw;document.getElementById('termTotal').textContent=money(comp);window.__lastDetails.term={type:'fixed',from,to,days360:d,months:mo,monthlyWage:mw,raw,comp,applied2Min:a2m,wageBase:b,clauseType:'no'};return comp}else{const d=diffDays360Inclusive(rs,re);if(!d)return 0;const y=Math.round(d/360*10000)/10000,raw=y*.5*mw,comp=Math.max(raw,2*mw),a2m=raw<2*mw;document.getElementById('termTotal').textContent=money(comp);window.__lastDetails.term={type:'indef',from:rs,to:re,days360:d,years:y,monthlyWage:mw,raw,comp,applied2Min:a2m,wageBase:b,clauseType:'no'};return comp}}
+function calcOvertime(){const dh=toNumber(document.getElementById('otDayHours').value),oh=toNumber(document.getElementById('otHours').value),hh=toNumber(document.getElementById('otHolidayHours').value),yh=toNumber(document.getElementById('otYearHours').value),ba=toNumber(document.getElementById('basic').value),ac=toNumber(document.getElementById('total').value);if(ba<=0||ac<=0){['otHourRate','otNormalTotal','otHolidayTotal','otTotal'].forEach(id=>document.getElementById(id).textContent=money(0));window.__lastDetails.ot=null;return 0}const ahr=ac/30/dh,bhr=ba/30/dh,rate=ahr+bhr*.5,nt=oh*rate,ht=hh*rate,t=nt+ht;document.getElementById('otHourRate').textContent=money(rate);document.getElementById('otNormalTotal').textContent=money(nt);document.getElementById('otHolidayTotal').textContent=money(ht);document.getElementById('otTotal').textContent=money(t);window.__lastDetails.ot={dayHours:dh,otHours:oh,holidayHours:hh,yearHours:yh,rate,normalTotal:nt,holidayTotal:ht,actualHourRate:ahr,basicHourRate:bhr,basicWage:ba,actualWage:ac};return t}
+function calcAbsent(){const b=document.getElementById('wageBaseAbs').value,h=toNumber(document.getElementById('absDayHours').value),d=toNumber(document.getElementById('absDays').value),lh=toNumber(document.getElementById('absLateH').value),lm=toNumber(document.getElementById('absLateM').value),dw=wageDaily(b),hw=wageHourly(b,h);if(dw<=0||hw<=0){document.getElementById('absTotal').textContent=money(0);return 0}const t=d*dw+lh*hw+(lm/60)*hw;document.getElementById('absTotal').textContent=money(t);return t}
+function calcRentAvg(){const v=Array.from(document.querySelectorAll('.rent')).map(i=>toNumber(i.value)).filter(x=>x>0);if(!v.length){document.getElementById('rentAvg').textContent=money(0);return 0}const a=v.reduce((x,y)=>x+y,0)/v.length;document.getElementById('rentAvg').textContent=money(a);return a}
+function calcNotice(){const type=document.getElementById('ntcContractType').value,party=document.getElementById('ntcParty').value,inp=toNumber(document.getElementById('ntcDays').value),comp=toNumber(document.getElementById('ntcCompliedDays').value),b=document.getElementById('wageBaseNtc').value,dw=wageDaily(b);const badge=document.getElementById('ntcPartyBadge'),lbl=document.getElementById('ntcTotalLabel');if(party==='employer'){badge.textContent='صاحب العمل';badge.className='party-badge party-employer';lbl.textContent='بدل الإشعار لصاحب العمل'}else{badge.textContent='العامل';badge.className='party-badge party-worker';lbl.textContent='بدل الإشعار للعامل'}const cf=document.getElementById('ntcCompliedField'),sr=document.getElementById('ntcShortageRow');if(party==='employer')cf.style.display='';else{cf.style.display='none';document.getElementById('ntcCompliedDays').value=''}const min=type==='indef_monthly'?60:type==='indef_other'?30:0;document.getElementById('ntcMinDays').textContent=type==='fixed'?'لا ينطبق':String(min);let ap=0,tot=0,sh=0;if(type==='fixed'){if(inp>0){ap=inp;if(party==='employer'&&comp>0){sh=Math.max(0,ap-comp);tot=sh*dw}else{sh=ap;tot=ap*dw}}}else{ap=inp>0?inp:min;if(party==='employer'&&comp>0){sh=Math.max(0,ap-comp);tot=sh*dw}else{sh=ap;tot=ap*dw}}if(party==='employer'&&comp>0&&ap>0){sr.style.display='';document.getElementById('ntcShortageDays').textContent=String(sh)}else sr.style.display='none';document.getElementById('ntcAppliedDays').textContent=ap>0?String(ap):'—';document.getElementById('ntcDailyWage').textContent=money(dw);document.getElementById('ntcTotal').textContent=money(tot);window.__lastDetails.ntc={type,party,inputDays:inp,minDays:min,appliedDays:ap,compliedDays:comp,shortageDays:sh,dailyWage:dw,wageBase:b};return tot}
+function calcSettlement(){const status=document.getElementById('slhStatus').value,date=document.getElementById('slhDate').value,summary=(document.getElementById('slhSummary').value||'').trim();window.__lastDetails.slh={status,date,summary};return status!=='no'}
+function calcServiceCert(){const status=document.getElementById('svcStatus').value,job=(document.getElementById('svcJob').value||'').trim(),start=document.getElementById('relStart').value,end=document.getElementById('relEnd').value,wage=wageMonthly(document.getElementById('wageBaseES').value)||wageMonthly('total');document.getElementById('svcStart').value=start||'';document.getElementById('svcEnd').value=end||'';document.getElementById('svcWage').value=wage>0?money(wage):'';window.__lastDetails.svc={status,job,start,end,wage};return status==='yes'}
+function updateSummary(rl,es,vac,term,ot,abs,rent,ntc){document.getElementById('sum-rl').textContent=money(rl);document.getElementById('sum-es').textContent=money(es);document.getElementById('sum-vac').textContent=money(vac);document.getElementById('sum-term').textContent=money(term);document.getElementById('sum-ot').textContent=money(ot);document.getElementById('sum-abs').textContent=money(abs);document.getElementById('sum-rent').textContent=money(rent);document.getElementById('sum-ntc').textContent=money(ntc);const p=(window.__lastDetails&&window.__lastDetails.ntc&&window.__lastDetails.ntc.party)||'worker';const nl=document.getElementById('sum-ntc-label');let grand;if(p==='employer'){nl.textContent='الإشعار (لصاحب العمل)';grand=rl+es+vac+term+ot-abs-ntc}else{nl.textContent='الإشعار (للعامل)';grand=rl+es+vac+term+ot+ntc-abs}document.getElementById('sum-grand').textContent=money(grand);const _ms=document.getElementById('ms-grand');if(_ms)_ms.textContent=money(grand);return grand}
+function runLive(){clearErrAll();normalizeDateField('relStart');normalizeDateField('relEnd');normalizeDateField('contractEnd');if(document.getElementById('rlMode').value==='date'){normalizeDateField('rlFrom');normalizeDateField('rlTo')}updateTotal();syncDates();toggleTermClause();window.__lastDetails=window.__lastDetails||{};calcProbation();const rl=calcRentLate(),es=calcEndService(),vac=calcVacation(),term=calcTermination(),ot=calcOvertime(),abs=calcAbsent(),rent=calcRentAvg(),ntc=calcNotice(),grand=updateSummary(rl,es,vac,term,ot,abs,rent,ntc);calcSettlement();calcServiceCert();window.__lastResults={rl,es,vac,term,ot,abs,rent,ntc,grand,prob:window.__lastDetails.prob};refreshClaims();calcLimitation();if(typeof buildAllReasons==='function')buildAllReasons();if(typeof scheduleAutoSave==='function')scheduleAutoSave();if(typeof pushHistory==='function')pushHistory()}
+function resetAll(){['basic','allow','total','after','plaintiff','defendant','relStart','relEnd','contractEnd','g2hDate','h2gHijri','h2gDate','limLastDay','limClaimDay','probDays','probSick','probOtherExcluded','rlFrom','rlTo','rlMonths','rlDays','esUnpaidDays','vacUsed','otHours','otHolidayHours','otYearHours','absDays','absLateH','absLateM','ntcDays','ntcCompliedDays','qeInput','termClauseAmount','termClauseMonths','termClauseDays','slhDate','slhSummary','svcJob','svcStart','svcEnd','svcWage'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});['typePer','rlMode','esMethod','wageBaseES','wageBaseVAC','termType','wageBaseTerm','termHasClause','otDayHours','absDayHours','wageBaseAbs','ntcContractType','ntcParty','wageBaseNtc','slhStatus','svcStatus'].forEach(id=>{const el=document.getElementById(id);if(!el)return;const defaults={typePer:'sa',rlMode:'date',esMethod:'84',wageBaseES:'total',wageBaseVAC:'total',termType:'fixed',wageBaseTerm:'total',termHasClause:'no',otDayHours:'8',absDayHours:'8',wageBaseAbs:'total',ntcContractType:'indef_monthly',ntcParty:'worker',wageBaseNtc:'total',slhStatus:'no',svcStatus:'no'};el.value=defaults[id]});document.getElementById('mvFirst5').value='21';document.getElementById('mvAfter5').value='30';for(let i=1;i<=12;i++){const el=document.getElementById('r'+i);if(el)el.value=''}['rlTotal','esTotal','vacPayTotal','termTotal','otHourRate','otNormalTotal','otHolidayTotal','otTotal','absTotal','rentAvg','ntcTotal','ntcDailyWage'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=money(0)});['ntcMinDays','ntcAppliedDays'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—'});document.getElementById('vacAccrued').value='';document.getElementById('vacRemaining').value='';document.getElementById('limDays').textContent='—';document.getElementById('limMsg').textContent='—';['probOfficialTotal','probManualExcludedTotal','probExcludedTotal'].forEach(id=>document.getElementById(id).textContent='0');['probEndDate','probActualDays','probResult'].forEach(id=>document.getElementById(id).textContent='—');document.getElementById('probHolidayList').value='';window.__probationWithin=false;['txt-claim-rl','txt-claim-es','txt-claim-vac','txt-claim-term','txt-claim-ot','txt-claim-ntc','txt-claim-grand'].forEach(id=>document.getElementById(id).value='');toggleRL();toggleTermClause();window.__lastResults={rl:0,es:0,vac:0,term:0,ot:0,abs:0,rent:0,ntc:0,grand:0,prob:null};window.__lastDetails={rl:null,es:null,vac:null,term:null,ot:null,prob:null,ntc:null,lim:null,slh:null,svc:null};updateTotal();syncDates();updateSummary(0,0,0,0,0,0,0,0);refreshClaims();updateDateConverters();calcLimitation();if(typeof buildAllReasons==='function')buildAllReasons()}
+function onInput(id,fn){const el=document.getElementById(id);if(!el)return;el.addEventListener('input',fn);el.addEventListener('change',fn)}
+['basic','allow','after','relStart','relEnd','contractEnd','probDays','probSick','probOtherExcluded','rlFrom','rlTo','rlMonths','rlDays','esMethod','wageBaseES','esUnpaidDays','mvFirst5','mvAfter5','vacUsed','wageBaseVAC','termType','wageBaseTerm','termHasClause','termClauseAmount','termClauseMonths','termClauseDays','otDayHours','otHours','otHolidayHours','otYearHours','absDayHours','absDays','absLateH','absLateM','wageBaseAbs','ntcContractType','ntcParty','ntcDays','ntcCompliedDays','wageBaseNtc','slhStatus','slhDate','slhSummary','svcStatus','svcJob'].forEach(id=>onInput(id,runLive));onInput('rlMode',()=>{toggleRL();runLive()});onInput('g2hDate',updateDateConverters);onInput('h2gHijri',updateDateConverters);onInput('limLastDay',()=>{calcLimitation();if(typeof buildAllReasons==='function')buildAllReasons()});onInput('limClaimDay',()=>{calcLimitation();if(typeof buildAllReasons==='function')buildAllReasons()});for(let i=1;i<=12;i++)onInput('r'+i,runLive);onInput('plaintiff',()=>{refreshClaims();if(typeof buildAllReasons==='function')buildAllReasons()});onInput('defendant',()=>{refreshClaims();if(typeof buildAllReasons==='function')buildAllReasons()});toggleRL();toggleTermClause();resetAll();
+</script>
+<script>
+function _parties(){const {plaintiff,defendant}=getNames();return{P:plaintiff,D:defendant}}
+function _num(n){return money(Math.round((n||0)*100)/100)}
+function _words(n){return numToWords(Math.round((n||0)*100)/100)}
+function _setStatus(id,cls,txt){const el=document.getElementById(id);if(!el)return;el.className='reason-status '+cls;el.textContent=txt}
+function _setPane(aId,rId,val){const a=document.getElementById(aId),r=document.getElementById(rId);if(a)a.value=val.accept||'';if(r)r.value=val.reject||''}
+
+function buildReasonRL(){const R=window.__lastResults||{},D=window.__lastDetails||{},d=D.rl,{P,D:DE}=_parties();let accept='',reject='';if(d&&R.rl>0){const per=d.mode==='date'?`عن الفترة من (${fmtDate(d.from)}) إلى (${fmtDate(d.to)})`:`عن مدة (${d.months}) شهرًا و(${d.days}) يومًا`;const wa=toNumber(document.getElementById('after').value);accept=`ولما كانت المادة (٩٠) من نظام العمل قد نصّت على أنه: «يُدفع الأجر بالعملة الرسمية للبلاد، وتؤدَّى الأجور في أحد أيام العمل...»، وكانت المادة (٦١/١) قد أوجبت على صاحب العمل أن «يعطي العامل الأجر المستحق»، ولما ثبت من أوراق الدعوى أن المدعي (${P}) قد عمل لدى المدعى عليه (${DE}) ${per}، بإجمالي (${d.days360}) يومًا على أساس (السنة ٣٦٠ يومًا/الشهر ٣٠ يومًا)، ولم يقم المدعى عليه بسداد أجور هذه المدة، وكان الأجر المعتمد (${_num(wa)}) ريالًا بعد حسم التأمينات، فإن أجر اليوم يكون (${_num(wa/30)}) ريالًا، وبضربه في (${d.days360}) يومًا يبلغ الإجمالي (${_num(R.rl)}) ريالًا؛ فبناءً على ما تقدم ولأن الأجر حق ثابت للعامل، ولم يُقدم المدعى عليه ما يثبت السداد، تكون المطالبة قائمة على أساس نظامي صحيح، فيستحق المدعي (${P}) عن هذا البند مبلغًا قدره (${_num(R.rl)}) ريالًا - ${_words(R.rl)} فقط لا غير.`;reject=`ولما كانت المادة (٦١/١) قد أوجبت أداء الأجر مقابل العمل، وكانت المادة (٧٧) من نظام الإثبات قد جعلت البيّنة على المدعي، ولما لم يقدم المدعي (${P}) ما يُثبت مطالبته، وأنكر المدعى عليه (${DE}) وأثبت السداد، فبناءً على ما تقدم تكون المطالبة غير قائمة على أساس مما يستوجب صرف النظر عنها.`}else{accept='(لا توجد بيانات كافية).';reject='(لا توجد بيانات كافية).'}_setPane('rt-rl-a','rt-rl-r',{accept,reject});_setStatus('rs-rl',R.rl>0?'accept':'neutral',R.rl>0?'المبلغ: '+_num(R.rl):'—')}
+
+function buildReasonES(){const R=window.__lastResults||{},D=window.__lastDetails||{},d=D.es,{P,D:DE}=_parties();let accept='',reject='';const prob=D.prob;if(prob&&prob.within){reject=`ولما كانت المادة (٥٣) من نظام العمل قد أجازت إنهاء العقد خلال فترة التجربة، ولما ثبت أن العلاقة بدأت في (${fmtDate(prob.start)}) وانتهت في (${fmtDate(prob.end)}) خلال فترة التجربة المتفق عليها (${prob.effectiveAgreedDays}) يومًا، فبناءً على ما تقدم لا يُرتب استحقاق المكافأة، تكون المطالبة غير قائمة على أساس مما يستوجب صرف النظر عنها.`;accept='(الإنهاء في فترة التجربة).';_setStatus('rs-es','reject','فترة تجربة')}else if(d&&R.es>0){const art=d.method==='84'?'ولما كانت المادة (٨٤) من نظام العمل قد نصّت على أنه: «إذا انتهت علاقة العمل، وجب على صاحب العمل أن يدفع مكافأة عن مدة الخدمة بواقع أجر نصف شهر عن كل سنة من السنوات الخمس الأولى، وأجر شهر عن كل من السنوات التالية»':'ولما كانت المادة (٨٥) قد نصّت على أنه: «إذا كان الانتهاء بسبب استقالة العامل يستحق ثلث المكافأة بعد سنتين، وثلثيها إذا زادت على خمس، والمكافأة كاملة إذا بلغت عشرًا»';accept=`${art}، ولما ثبت أن العلاقة استمرت من (${fmtDate(d.start)}) إلى (${fmtDate(d.end)}) بإجمالي (${d.totalDays360}) يومًا، وبعد حسم الإجازات بدون أجر (${d.unpaid}) يومًا، يصبح الصافي (${d.netDays360}) يومًا بما يعادل (${d.years}) سنة، وكان الأجر (${_num(d.monthlyWage)}) ريالًا شهريًا، فإن المكافأة تحتسب: (${Math.min(d.years,5)}) سنة × نصف الأجر = (${_num(d.full5Portion)})${d.years>5?`، + (${(d.years-5).toFixed(4)}) × الأجر = (${_num(d.after5Portion)})`:''}${d.method==='85'?`، × نصاب م85 (${d.m85factor===1/3?'الثلث':d.m85factor===2/3?'الثلثين':'كامل'})`:''}، فيبلغ (${_num(R.es)}) ريالًا؛ فبناءً على ما تقدم يستحق المدعي (${P}) مبلغًا قدره (${_num(R.es)}) ريالًا - ${_words(R.es)} فقط لا غير.`;reject=`ولما كانت المادة (٨٠) من نظام العمل قد عددت الحالات التي يجوز فيها الفسخ دون مكافأة، ولما ثبت أن (سبب الإنهاء يندرج ضمن حالات م٨٠)، فبناءً على ما تقدم تكون المطالبة غير قائمة على أساس مما يستوجب صرف النظر عنها.`;_setStatus('rs-es','accept','المبلغ: '+_num(R.es))}else{accept='(لا توجد بيانات كافية).';reject='(لا توجد بيانات كافية).';_setStatus('rs-es','neutral','—')}_setPane('rt-es-a','rt-es-r',{accept,reject})}
+
+function buildReasonVAC(){const R=window.__lastResults||{},D=window.__lastDetails||{},d=D.vac,{P,D:DE}=_parties();let accept='',reject='';if(d&&R.vac>0){accept=`ولما كانت المادة (١٠٩) من نظام العمل قد نصّت على أن «للعامل الحق في إجازة سنوية مدفوعة الأجر لا تقل عن واحد وعشرين يومًا، تزاد إلى ثلاثين يومًا بعد خمس سنوات متصلة»، وكانت المادة (١١١) قد نصّت على أن «للعامل الحق في أجر عن أيام الإجازة المستحقة إذا ترك العمل قبل استعماله لها»، ولما ثبت أن العلاقة استمرت من (${fmtDate(d.start)}) إلى (${fmtDate(d.end)}) بإجمالي (${d.days360}) يومًا (${d.years}) سنة، والرصيد المستحق (${d.accrued}) يومًا، والمصروف (${d.used}) يومًا، فيبقى المتبقي (${d.remaining}) يومًا، وأجر اليوم (${_num(d.dailyWage)}) ريالًا، فيبلغ الإجمالي (${_num(R.vac)}) ريالًا؛ فبناءً على ما تقدم يستحق المدعي (${P}) مبلغًا قدره (${_num(R.vac)}) ريالًا - ${_words(R.vac)} فقط لا غير.`;reject=`ولما كانت المادة (١١١) قد رتبت التعويض على وجود رصيد فعلي، ولما ثبت أن المدعى عليه (${DE}) قدم ما يفيد صرف كامل الإجازات، فبناءً على ما تقدم تكون المطالبة غير قائمة على أساس مما يستوجب صرف النظر عنها.`;_setStatus('rs-vac','accept','المبلغ: '+_num(R.vac))}else{accept='(لا توجد بيانات كافية).';reject='(لا توجد بيانات كافية).';_setStatus('rs-vac','neutral','—')}_setPane('rt-vac-a','rt-vac-r',{accept,reject})}
+
+function buildReasonTERM(){const R=window.__lastResults||{},D=window.__lastDetails||{},d=D.term,{P,D:DE}=_parties();let accept='',reject='';const prob=D.prob;if(prob&&prob.within){reject=`ولما كانت المادة (٥٣) قد أجازت إنهاء العقد خلال فترة التجربة، وكانت المادة (٧٧) قد رتبت التعويض على الفسخ لسبب غير مشروع، فبناءً على ما تقدم لا يترتب تعويض، مما يستوجب صرف النظر عن هذا البند.`;accept='(في فترة التجربة).';_setStatus('rs-term','reject','فترة تجربة')}else if(d&&R.term>0){if(d.clauseType&&d.clauseType!=='no'){const cd=d.clauseType==='fixed_amount'?`مبلغًا مقطوعًا قدره (${_num(d.clauseValue)}) ريالًا`:d.clauseType==='months_wage'?`(${d.clauseValue}) أشهر من الأجر`:`(${d.clauseValue}) يومًا من الأجر`;accept=`ولما كانت المادة (٧٧) من نظام العمل قد جعلت التعويض حقًا للطرف المتضرر من الإنهاء غير المشروع، ولما ثبت أن عقد العمل بين المدعي (${P}) والمدعى عليه (${DE}) قد تضمن شرطًا جزائيًا صريحًا يقضي بأن يتحمل المُنهي تعويضًا للطرف الآخر ${cd}، وأن الإنهاء وقع لسبب غير مشروع، وكان الأجر (${_num(d.monthlyWage)}) ريالًا شهريًا، فإن قيمة التعويض ${d.clauseType==='fixed_amount'?`تُعادل المبلغ المتفق عليه`:`= (${_num(d.clauseTotal)}) ريالًا`}${d.applied2Min?`، ولما كان يقل عن الحد الأدنى (شهرين) وقدره (${_num(2*d.monthlyWage)}) ريالًا، فقد اعتُمد الحد الأدنى جبرًا للضرر`:''}؛ فبناءً على ما تقدم يستحق المدعي (${P}) مبلغًا قدره (${_num(R.term)}) ريالًا - ${_words(R.term)} فقط لا غير.`;reject=`ولما كان القاضي له سلطة تقدير مدى المبالغة في الشرط الجزائي، ولما ثبت أن (الشرط مبالغ فيه / أو أن الإنهاء بسبب مشروع)، فبناءً على ما تقدم تكون المطالبة غير قائمة على أساس مما يستوجب صرف النظر عنها.`}else if(d.type==='fixed'){accept=`ولما كانت المادة (٧٧) من نظام العمل قد نصّت على أنه: «إذا أُنهي العقد لسبب غير مشروع كان للطرف الذي أصابه ضرر الحق في تعويض... أ) للعامل المرتبط بعقد محدد المدة: أجر المدة المتبقية»، ولما ثبت أن العقد محدد المدة، وأن الإنهاء وقع في (${fmtDate(d.from)}) قبل انتهاء مدته في (${fmtDate(d.to)})، وأن المدة المتبقية (${d.days360}) يومًا بما يعادل (${d.months}) شهرًا، وكان الأجر (${_num(d.monthlyWage)}) ريالًا شهريًا، فإن التعويض = (${d.months}) × (${_num(d.monthlyWage)}) = (${_num(d.raw)}) ريالًا${d.applied2Min?`، ولما كان يقل عن الحد الأدنى (شهرين)، فقد اعتُمد (${_num(2*d.monthlyWage)}) ريالًا`:''}؛ فبناءً على ما تقدم يستحق المدعي (${P}) مبلغًا قدره (${_num(R.term)}) ريالًا - ${_words(R.term)} فقط لا غير.`;reject=`ولما كانت المادة (٧٧) قد رتبت التعويض على «الإنهاء لسبب غير مشروع»، ولما ثبت أن الإنهاء كان بسبب مشروع، فبناءً على ما تقدم تكون المطالبة غير قائمة على أساس مما يستوجب صرف النظر عنها.`}else{accept=`ولما كانت المادة (٧٧) قد نصّت على أنه: «ب) للعامل المرتبط بعقد غير محدد المدة: أجر خمسة عشر يومًا عن كل سنة»، ولما ثبت أن العقد غير محدد المدة، وأن مدة الخدمة من (${fmtDate(d.from)}) إلى (${fmtDate(d.to)}) بإجمالي (${d.days360}) يومًا (${d.years}) سنة، والأجر (${_num(d.monthlyWage)}) ريالًا، فإن التعويض = (${d.years}) × نصف شهر = (${_num(d.raw)}) ريالًا${d.applied2Min?`، اعتُمد الحد الأدنى (${_num(2*d.monthlyWage)}) ريالًا`:''}؛ فبناءً على ما تقدم يستحق المدعي (${P}) مبلغًا قدره (${_num(R.term)}) ريالًا - ${_words(R.term)} فقط لا غير.`;reject=`ولما كانت المادة (٧٧) قد رتبت التعويض على «الإنهاء لسبب غير مشروع»، ولما ثبت أن الإنهاء كان مشروعًا، فبناءً على ما تقدم تكون المطالبة غير قائمة على أساس مما يستوجب صرف النظر عنها.`}_setStatus('rs-term','accept','المبلغ: '+_num(R.term))}else{accept='(لا توجد بيانات كافية).';reject='(لا توجد بيانات كافية).';_setStatus('rs-term','neutral','—')}_setPane('rt-term-a','rt-term-r',{accept,reject})}
+
+function buildReasonOT(){const R=window.__lastResults||{},D=window.__lastDetails||{},d=D.ot,{P,D:DE}=_parties();let accept='',reject='';if(d&&R.ot>0){accept=`ولما كانت المادة (١٠٧) من نظام العمل قد نصّت على أنه: «إذا وقعت ظروف اقتضت تشغيل العامل أكثر من ساعات العمل العادية، وجب دفع أجر إضافي يعادل أجر الساعة مضافًا إليه (٥٠٪) من أجره الأساسي»، ولما ثبت أن المدعي (${P}) عمل ساعات إضافية عادية (${d.otHours}) وفي العطل (${d.holidayHours})، وكان الأجر الأساسي (${_num(d.basicWage)}) والفعلي (${_num(d.actualWage)}) ريالًا شهريًا، فإن أجر الساعة الإضافية = (${_num(d.rate)}) ريالًا، فيبلغ الإجمالي (${_num(R.ot)}) ريالًا؛ فبناءً على ما تقدم يستحق المدعي (${P}) مبلغًا قدره (${_num(R.ot)}) ريالًا - ${_words(R.ot)} فقط لا غير.`;reject=`ولما كانت المطالبة تستلزم إثبات الساعات الإضافية، ولما لم يقدم المدعي ما يثبتها، فبناءً على ما تقدم تكون المطالبة غير قائمة على أساس مما يستوجب صرف النظر عنها.`;_setStatus('rs-ot','accept','المبلغ: '+_num(R.ot))}else{accept='(لا توجد بيانات كافية).';reject='(لا توجد بيانات كافية).';_setStatus('rs-ot','neutral','—')}_setPane('rt-ot-a','rt-ot-r',{accept,reject})}
+
+function buildReasonNTC(){const R=window.__lastResults||{},D=window.__lastDetails||{},d=D.ntc,{P,D:DE}=_parties();let accept='',reject='';if(d&&R.ntc>0){const partyTxt=d.party==='employer'?`المدعي (${P}) بوصفه صاحب العمل ضد المدعى عليه (${DE}) بوصفه العامل`:`المدعي (${P}) بوصفه العامل ضد المدعى عليه (${DE}) بوصفه صاحب العمل`;if(d.type==='fixed'){accept=`ولما كان اتفاق الطرفين قد تضمن شرطًا صريحًا بالإشعار قبل الإنهاء المبكر للعقد محدد المدة بمدة (${d.appliedDays}) يومًا، ولما ثبت أن ${partyTxt}، وأن الإخلال ثابت، وكان أجر اليوم (${_num(d.dailyWage)}) ريالًا، فإن البدل = (${_num(R.ntc)}) ريالًا؛ فبناءً على ما تقدم يستحق المدعي (${P}) مبلغًا قدره (${_num(R.ntc)}) ريالًا - ${_words(R.ntc)} فقط لا غير.`}else{accept=`ولما كانت المادة (٧٥) من نظام العمل قد نصّت على أنه: «إذا كان العقد غير محدد المدة، جاز إنهاؤه بموجب إشعار كتابيًا قبل الإنهاء بستين يومًا للأجر الشهري، وثلاثين لغيره»، وكانت المادة (٧٦) قد نصّت على استحقاق البدل عند الإخلال، ولما ثبت أن ${partyTxt} دون التزامٍ بمهلة الإشعار (${d.minDays}) يومًا، وكان أجر اليوم (${_num(d.dailyWage)}) ريالًا، فإن البدل = (${_num(R.ntc)}) ريالًا؛ فبناءً على ما تقدم يستحق المدعي (${P}) مبلغًا قدره (${_num(R.ntc)}) ريالًا - ${_words(R.ntc)} فقط لا غير.`}reject=`ولما كانت المادة (٧٥) قد قصرت الإشعار على العقود غير محددة المدة، ولما ثبت (انتفاء موجب الاستحقاق)، فبناءً على ما تقدم تكون المطالبة غير قائمة على أساس مما يستوجب صرف النظر عنها.`;_setStatus('rs-ntc','accept','المبلغ: '+_num(R.ntc))}else{accept='(لا توجد بيانات كافية).';reject='(لا توجد بيانات كافية).';_setStatus('rs-ntc','neutral','—')}_setPane('rt-ntc-a','rt-ntc-r',{accept,reject})}
+
+function buildReasonLIM(){const D=window.__lastDetails||{},d=D.lim,{P,D:DE}=_parties();let accept='',reject='';if(d){accept=`ولما كانت المادة (٢٣٤) من نظام العمل قد نصّت على أنه: «لا تُسمَع - عند الإنكار وعدم العذر المقبول - أي دعوى تُرفع بعد اثني عشر شهرًا من تاريخ انتهاء علاقة العمل»، ولما ثبت أن آخر يوم عمل للمدعي (${P}) كان في (${fmtDate(d.lastDay)})، وأن الدعوى قُيدت في (${fmtDate(d.claimDay)})، فتكون المدة (${d.days}) يومًا، وهي أقل من (٣٦٠) يومًا، فبناءً على ما تقدم لا يظهر مضي مدة عدم القبول، وتكون الدعوى مقبولة شكلاً.`;reject=`ولما كانت المادة (٢٣٤) قد نصّت على عدم سماع الدعوى بعد اثني عشر شهرًا، ولما ثبت أن آخر يوم عمل في (${fmtDate(d.lastDay)}) والدعوى قُيدت في (${fmtDate(d.claimDay)}) بمدة (${d.days}) يومًا تجاوزت (٣٦٠)، فبناءً على ما تقدم تظهر مدة عدم القبول وفق المادة (٢٣٤)، مما يستوجب صرف النظر عن الدعوى.`;_setStatus('rs-lim',d.passed?'reject':'accept',d.passed?'مضت':'لم تمضِ')}else{accept='(لا توجد بيانات كافية).';reject='(لا توجد بيانات كافية).';_setStatus('rs-lim','neutral','—')}_setPane('rt-lim-a','rt-lim-r',{accept,reject})}
+
+/* ========= 🤝 الصلح - النسخة المُصحَّحة ========= */
+function buildReasonSLH(){
+  const D=window.__lastDetails||{},d=D.slh||{},{P,D:DE}=_parties();
+  let reason='',verdict='';
+  const status=d.status||'no';
+  if(status==='no'){
+    reason='(لم يتم تفعيل الصلح في بطاقة «🤝 الصلح»).';
+    verdict='';
+    _setStatus('rs-slh','neutral','—');
+  } else {
+    const dateTxt = d.date ? ` بتاريخ (${fmtDate(d.date)})` : '';
+    const scopeTxt = status==='full' ? 'صلحًا شاملًا لجميع المستحقات المتبادلة بينهما' 
+                    : status==='partial' ? 'صلحًا في جزء من المطالبات'
+                    : 'صلحًا مع إسقاط المدعي لما زاد من مطالبات';
+    // بنود الصلح: تُؤخذ حرفيًا من حقل "ملخص محل الصلح"
+    const bunood = d.summary ? d.summary : '[يرجى كتابة بنود الصلح في حقل «بنود الصلح» في بطاقة الصلح]';
+    
+    // 🔹 التسبيب: بدون المادة 104 (غير موجودة)
+    reason = `ولما كانت الفقرة (٣/٧٠) من اللائحة التنفيذية لنظام المرافعات الشرعية قد أجازت للخصمين إنهاء النزاع بالصلح في أي مرحلة تكون عليها الدعوى، وقررت أن «الصك الصادر بإثبات الصلح لا يخضع للاستئناف»، ولما اتفق طرفا الدعوى المدعي (${P}) والمدعى عليه (${DE}) على إنهاء النزاع القائم بينهما ${scopeTxt}${dateTxt}، ${d.summary?`ومحلّ الصلح: ${d.summary}`:''}، وبعد أن استوفت الدائرة شروط الصلح النظامية وثبت لديها أهلية الطرفين ورضاهما التام دون إكراه، فبناءً على ما تقدم ولأن الصلح المبرم قد استوفى أركانه وشروطه النظامية، تكون الدائرة قد قررت إثبات الصلح والحكم بموجبه.`;
+    
+    // 🔹 المنطوق بالصيغة المطلوبة: "ثبت لدي هذا الصلح بأن [بنود الصلح] وألزمت الطرفين العمل به، وأفهمتهما بأن الحكم نهائي غير خاضع للاعتراض"
+    verdict = `ثبت لدي هذا الصلح بأن ${bunood} وألزمت الطرفين العمل به، وأفهمتهما بأن الحكم نهائي غير خاضع للاعتراض.`;
+    
+    _setStatus('rs-slh','accept','صلح '+(status==='full'?'كلي':status==='partial'?'جزئي':'مع إسقاط'));
+  }
+  document.getElementById('rt-slh-a').value = reason;
+  document.getElementById('rt-slh-v').value = verdict;
+}
+
+function buildReasonSVC(){const D=window.__lastDetails||{},d=D.svc||{},{P,D:DE}=_parties();let reason='',verdict='';if(d.status!=='yes'||!d.start||!d.end){reason='(لم يتم تفعيل شهادة الخدمة).';verdict='';_setStatus('rs-svc','neutral','—')}else{const wageTxt=d.wage>0?_num(d.wage)+' ريال':'الأجر المعتمد';const jobTxt=d.job||'المهنة المتفق عليها';reason=`ولما كانت المادة (٦٤) من نظام العمل قد نصّت على أنه: «يعطي صاحب العمل العامل - بناءً على طلبه - عند انتهاء عقد العمل شهادة خدمة دون مقابل، يوضح فيها تاريخ التحاقه وتاريخ انتهاء علاقته ومهنته ومقدار أجره الأخير»، وكانت هذه الشهادة حقًا مكتسبًا للعامل بموجب النص النظامي، ولما ثبت أن العلاقة العمالية بين المدعي (${P}) والمدعى عليه (${DE}) استمرت من (${fmtDate(d.start)}) إلى (${fmtDate(d.end)})، ومهنة المدعي (${jobTxt})، وأجره الأخير (${wageTxt})، فبناءً على ما تقدم تكون المطالبة قائمة على أساس صحيح مما يستوجب الحكم بها.`;verdict=`إلزام المدعى عليه (${DE}) أن يسلم للمدعي (${P}) شهادة عن مدة خدمته من (${fmtDate(d.start)}) إلى (${fmtDate(d.end)}) بأجر (${wageTxt}) وبمهنة (${jobTxt}).`;_setStatus('rs-svc','accept','مستحقة')}document.getElementById('rt-svc-a').value=reason;document.getElementById('rt-svc-v').value=verdict}
+
+/* ========= 📢 المنطوق الشامل ========= */
+function buildFullVerdict(){
+  const R=window.__lastResults||{},D=window.__lastDetails||{},{P,D:DE}=_parties();
+  
+  // 🔹 الصلح له أولوية مطلقة - يظهر بصيغته الخاصة "ثبت لدي هذا الصلح"
+  if(D.slh && D.slh.status && D.slh.status!=='no'){
+    const slhV = document.getElementById('rt-slh-v').value;
+    if(slhV){
+      document.getElementById('rt-all-verdict').value = slhV;
+      return;
+    }
+  }
+  
+  const items = [];
+  function push(amt,text){if(amt>0)items.push(text)}
+  push(R.rl,`إلزام المدعى عليه (${DE}) أن يسلم للمدعي (${P}) مبلغًا قدره (${_num(R.rl)}) ريالًا (${_words(R.rl)}) عن الأجور المتأخرة.`);
+  push(R.es,`إلزام المدعى عليه (${DE}) أن يسلم للمدعي (${P}) مبلغًا قدره (${_num(R.es)}) ريالًا (${_words(R.es)}) عن مكافأة نهاية الخدمة.`);
+  push(R.vac,`إلزام المدعى عليه (${DE}) أن يسلم للمدعي (${P}) مبلغًا قدره (${_num(R.vac)}) ريالًا (${_words(R.vac)}) عن التعويض عن رصيد الإجازات.`);
+  push(R.term,`إلزام المدعى عليه (${DE}) أن يسلم للمدعي (${P}) مبلغًا قدره (${_num(R.term)}) ريالًا (${_words(R.term)}) عن التعويض عن فسخ العقد.`);
+  push(R.ot,`إلزام المدعى عليه (${DE}) أن يسلم للمدعي (${P}) مبلغًا قدره (${_num(R.ot)}) ريالًا (${_words(R.ot)}) عن أجر ساعات العمل الإضافية.`);
+  if(R.ntc>0){
+    const isEmp = D.ntc && D.ntc.party==='employer';
+    items.push(isEmp
+      ? `إلزام المدعى عليه (${DE}) بأن يدفع للمدعي (${P}) مبلغًا قدره (${_num(R.ntc)}) ريالًا (${_words(R.ntc)}) عن بدل الإشعار.`
+      : `إلزام المدعى عليه (${DE}) أن يسلم للمدعي (${P}) مبلغًا قدره (${_num(R.ntc)}) ريالًا (${_words(R.ntc)}) عن بدل الإشعار.`);
+  }
+  if(D.svc && D.svc.status==='yes' && D.svc.start && D.svc.end){
+    const wageTxt = D.svc.wage>0 ? _num(D.svc.wage)+' ريال' : 'الأجر المعتمد';
+    items.push(`إلزام المدعى عليه (${DE}) أن يسلم للمدعي (${P}) شهادة عن مدة خدمته من (${fmtDate(D.svc.start)}) إلى (${fmtDate(D.svc.end)}) بأجر (${wageTxt}) وبمهنة (${D.svc.job||'المهنة المتفق عليها'}).`);
+  }
+  if(D.lim && D.lim.passed){
+    document.getElementById('rt-all-verdict').value = 'حكمت الدائرة بالآتي:\nأولًا: عدم قبول الدعوى لمضي مدة عدم السماع وفق المادة (٢٣٤) من نظام العمل.';
+    return;
+  }
+  if(!items.length){
+    document.getElementById('rt-all-verdict').value = '(لا توجد مطالبات مقبولة لبناء المنطوق).';
+    return;
+  }
+  const ord = ['أولًا','ثانيًا','ثالثًا','رابعًا','خامسًا','سادسًا','سابعًا','ثامنًا','تاسعًا','عاشرًا'];
+  let out = 'حكمت الدائرة بالآتي:\n';
+  items.forEach((t,i) => { out += (ord[i]||`(${i+1})`)+': '+t+'\n'; });
+  out += (ord[items.length]||`(${items.length+1})`)+': رد ما زاد من طلبات.';
+  document.getElementById('rt-all-verdict').value = out;
+}
+
+function buildAllReasons(){buildReasonRL();buildReasonES();buildReasonVAC();buildReasonTERM();buildReasonOT();buildReasonNTC();buildReasonLIM();buildReasonSLH();buildReasonSVC();buildFullVerdict()}
+
+document.addEventListener('click',e=>{const tab=e.target.closest('.reason-tab');if(!tab)return;const parent=tab.closest('.reason-block');if(!parent)return;parent.querySelectorAll('.reason-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');const target=tab.getAttribute('data-target');parent.querySelectorAll('.reason-pane').forEach(p=>p.classList.toggle('active',p.id===target))});
+function copyReason(id){const el=document.getElementById(id);if(!el)return;const t=(el.value||'').trim();if(!t||t.startsWith('('))return showToast('فارغ');copyText(t)}
+function editReason(id){const el=document.getElementById(id);if(!el)return;if(el.readOnly){el.readOnly=false;el.focus();showToast('يمكن التعديل')}else{el.readOnly=true;showToast('قُفل')}}
+document.getElementById('btnCopyAllReasons').addEventListener('click',()=>{const b=['rl','es','vac','term','ot','ntc','lim','slh','svc'];const ord=['أولًا','ثانيًا','ثالثًا','رابعًا','خامسًا','سادسًا','سابعًا','ثامنًا','تاسعًا'];const ti={rl:'الأجور',es:'نهاية الخدمة',vac:'الإجازات',term:'فسخ العقد',ot:'الإضافي',ntc:'الإشعار',lim:'التقادم',slh:'الصلح',svc:'شهادة الخدمة'};const parts=[];b.forEach((x,i)=>{let t='';if(x==='slh'||x==='svc'){const el=document.getElementById('rt-'+x+'-a');if(el)t=el.value}else{const a=document.querySelector('#rb-'+x+' .reason-tab.active');const tg=a?a.getAttribute('data-target'):'';const ta=document.getElementById('rt-'+x+'-a'),tr=document.getElementById('rt-'+x+'-r');if(tg&&tg.endsWith('-a')&&ta)t=ta.value;else if(tg&&tg.endsWith('-r')&&tr)t=tr.value}if(t&&!t.startsWith('('))parts.push(`━━ ${ord[i]}: ${ti[x]} ━━\n\n${t.trim()}`)});const fv=document.getElementById('rt-all-verdict').value;if(fv&&!fv.startsWith('('))parts.push('━━ 📢 المنطوق الشامل ━━\n\n'+fv.trim());if(!parts.length)return showToast('لا توجد');copyText(parts.join('\n\n\n'))});
+document.getElementById('btnRefreshReasons').addEventListener('click',()=>{buildAllReasons();showToast('✓ حُدّث')});
+</script>
+<script>
+const ALL_FIELDS=['typePer','basic','allow','after','plaintiff','defendant','relStart','relEnd','contractEnd','g2hDate','h2gHijri','limLastDay','limClaimDay','probDays','probSick','probOtherExcluded','rlMode','rlFrom','rlTo','rlMonths','rlDays','esMethod','wageBaseES','esUnpaidDays','mvFirst5','mvAfter5','vacUsed','wageBaseVAC','termType','wageBaseTerm','termHasClause','termClauseAmount','termClauseMonths','termClauseDays','otDayHours','otHours','otHolidayHours','otYearHours','absDayHours','absDays','absLateH','absLateM','wageBaseAbs','ntcContractType','ntcParty','ntcDays','ntcCompliedDays','wageBaseNtc','r1','r2','r3','r4','r5','r6','r7','r8','r9','r10','r11','r12','qeInput','slhStatus','slhDate','slhSummary','svcStatus','svcJob'];
+function collectFormData(){const d={};ALL_FIELDS.forEach(id=>{const el=document.getElementById(id);if(el)d[id]=el.value||''});return d}
+function applyFormData(d){if(!d)return;ALL_FIELDS.forEach(id=>{const el=document.getElementById(id);if(el&&id in d)el.value=d[id]||''});toggleRL();toggleTermClause();updateTotal();syncDates();runLive();updateDateConverters();calcLimitation()}
+
+const AUTOSAVE_KEY='lc_autosave_draft';let __ast=null;
+function scheduleAutoSave(){if(__ast)clearTimeout(__ast);__ast=setTimeout(()=>{try{localStorage.setItem(AUTOSAVE_KEY,JSON.stringify({data:collectFormData(),ts:Date.now()}));const ind=document.getElementById('saveIndicator');if(ind){ind.classList.add('show');setTimeout(()=>ind.classList.remove('show'),1500)}}catch(e){}},500)}
+function loadAutoSave(){try{const raw=localStorage.getItem(AUTOSAVE_KEY);if(!raw)return false;const o=JSON.parse(raw);if(o&&o.data){__loadingSnapshot=true;applyFormData(o.data);__loadingSnapshot=false;return true}}catch(e){}return false}
+
+const CASES_KEY='lc_cases_v1',ACTIVE_CASE_KEY='lc_active_case';
+function getCases(){try{return JSON.parse(localStorage.getItem(CASES_KEY)||'[]')}catch(e){return[]}}
+function setCases(a){try{localStorage.setItem(CASES_KEY,JSON.stringify(a))}catch(e){}}
+function getActiveCaseId(){return localStorage.getItem(ACTIVE_CASE_KEY)||''}
+function setActiveCaseId(id){if(id)localStorage.setItem(ACTIVE_CASE_KEY,id);else localStorage.removeItem(ACTIVE_CASE_KEY);updateCaseTag()}
+function updateCaseTag(){const tag=document.getElementById('caseTag'),id=getActiveCaseId();if(!id){tag.style.display='none';return}const c=getCases().find(x=>x.id===id);if(c){tag.style.display='';tag.textContent='📁 '+c.name}else tag.style.display='none'}
+function fmtCD(ts){try{const d=new Date(ts);return d.getFullYear()+'/'+pad2(d.getMonth()+1)+'/'+pad2(d.getDate())}catch(e){return''}}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderCasesList(f){f=(f||'').toLowerCase();const list=document.getElementById('casesList'),cs=getCases().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));if(!cs.length){list.innerHTML='<div class="case-empty">لا قضايا.</div>';return}const active=getActiveCaseId();const fs=cs.filter(c=>!f||(c.name||'').toLowerCase().includes(f));list.innerHTML=fs.map(c=>`<div class="case-item ${c.id===active?'active':''}"><div class="case-name">${escapeHtml(c.name)}</div><div class="case-meta">${fmtCD(c.updatedAt||c.createdAt)}</div><div class="case-actions"><button data-act="load" data-id="${c.id}">📂</button><button data-act="rename" data-id="${c.id}">✏️</button><button data-act="dup" data-id="${c.id}">📋</button><button class="del" data-act="del" data-id="${c.id}">🗑</button></div></div>`).join('')||'<div class="case-empty">لا نتائج.</div>'}
+function saveCurrentAsCase(n){n=(n||'').trim();if(!n)return;const cs=getCases(),id='c_'+Date.now(),now=Date.now();cs.push({id,name:n,data:collectFormData(),createdAt:now,updatedAt:now});setCases(cs);setActiveCaseId(id);renderCasesList(document.getElementById('casesSearch').value);showToast('✓ '+n)}
+function updateActiveCase(){const id=getActiveCaseId();if(!id)return;const cs=getCases(),i=cs.findIndex(c=>c.id===id);if(i<0)return;cs[i].data=collectFormData();cs[i].updatedAt=Date.now();setCases(cs);renderCasesList('')}
+function loadCase(id){const c=getCases().find(x=>x.id===id);if(!c)return;__loadingSnapshot=true;applyFormData(c.data);__loadingSnapshot=false;setActiveCaseId(id);clearHistory();pushHistory();renderCasesList('');showToast('✓ '+c.name);closeCasesDrawer()}
+function renameCase(id){const c=getCases().find(x=>x.id===id);if(!c)return;openModal('إعادة تسمية','الاسم:',c.name,n=>{n=(n||'').trim();if(!n)return;const cs=getCases(),i=cs.findIndex(x=>x.id===id);if(i>=0){cs[i].name=n;cs[i].updatedAt=Date.now();setCases(cs);updateCaseTag();renderCasesList('')}})}
+function dupCase(id){const c=getCases().find(x=>x.id===id);if(!c)return;const cs=getCases();cs.push({id:'c_'+Date.now(),name:c.name+' (نسخة)',data:JSON.parse(JSON.stringify(c.data)),createdAt:Date.now(),updatedAt:Date.now()});setCases(cs);renderCasesList('')}
+function delCase(id){const c=getCases().find(x=>x.id===id);if(!c||!confirm('حذف؟'))return;setCases(getCases().filter(x=>x.id!==id));if(getActiveCaseId()===id)setActiveCaseId('');renderCasesList('')}
+function exportCurrent(){const active=getActiveCaseId(),c=getCases().find(x=>x.id===active);const p={version:1,exportedAt:new Date().toISOString(),name:c?c.name:'قضية',data:collectFormData()};const blob=new Blob([JSON.stringify(p,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=(c?c.name.replace(/[\/\\:*?"<>|]/g,'_'):'labor')+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url)},100);showToast('✓ صُدّرت')}
+function importFile(f){const r=new FileReader();r.onload=e=>{try{const o=JSON.parse(e.target.result);if(!o||!o.data)throw Error();const cs=getCases();cs.push({id:'c_'+Date.now(),name:(o.name||'مستوردة')+' (م)',data:o.data,createdAt:Date.now(),updatedAt:Date.now()});setCases(cs);renderCasesList('');showToast('✓')}catch(e){showToast('❌')}};r.readAsText(f)}
+
+let __history=[],__hIdx=-1,__loadingSnapshot=false,__hT=null;
+function pushHistory(){if(__loadingSnapshot)return;if(__hT)clearTimeout(__hT);__hT=setTimeout(()=>{const s=JSON.stringify(collectFormData());if(__hIdx>=0&&__history[__hIdx]===s)return;__history=__history.slice(0,__hIdx+1);__history.push(s);if(__history.length>50){__history.shift();__hIdx=__history.length-1}else __hIdx=__history.length-1;updateHistBtns()},400)}
+function clearHistory(){__history=[];__hIdx=-1;updateHistBtns()}
+function updateHistBtns(){document.getElementById('btnUndo').disabled=__hIdx<=0;document.getElementById('btnRedo').disabled=__hIdx>=__history.length-1}
+function doUndo(){if(__hIdx<=0)return;__hIdx--;__loadingSnapshot=true;try{applyFormData(JSON.parse(__history[__hIdx]))}catch(e){}__loadingSnapshot=false;updateHistBtns();showToast('↶')}
+function doRedo(){if(__hIdx>=__history.length-1)return;__hIdx++;__loadingSnapshot=true;try{applyFormData(JSON.parse(__history[__hIdx]))}catch(e){}__loadingSnapshot=false;updateHistBtns();showToast('↷')}
+
+function toggleDark(){document.body.classList.toggle('dark');try{localStorage.setItem('lc_dark',document.body.classList.contains('dark')?'1':'0')}catch(e){}applyDarkBtn()}
+function applyDarkBtn(){const on=document.body.classList.contains('dark');const b=document.getElementById('btnDark');b.textContent=on?'☀️':'🌙';b.classList.toggle('active',on)}
+try{if(localStorage.getItem('lc_dark')==='1')document.body.classList.add('dark')}catch(e){}applyDarkBtn();
+
+/* الاستخلاص الذكي */
+const AR_ONES={'صفر':0,'واحد':1,'اثنان':2,'اثنين':2,'ثلاثة':3,'ثلاث':3,'أربعة':4,'اربعة':4,'أربع':4,'خمسة':5,'خمس':5,'ستة':6,'ست':6,'سبعة':7,'سبع':7,'ثمانية':8,'ثمان':8,'تسعة':9,'تسع':9,'عشرة':10,'عشر':10};
+const AR_TEENS={'أحد عشر':11,'احد عشر':11,'اثنا عشر':12,'اثني عشر':12,'ثلاثة عشر':13,'أربعة عشر':14,'خمسة عشر':15,'ستة عشر':16,'سبعة عشر':17,'ثمانية عشر':18,'تسعة عشر':19};
+const AR_TENS={'عشرون':20,'عشرين':20,'ثلاثون':30,'ثلاثين':30,'أربعون':40,'أربعين':40,'خمسون':50,'خمسين':50,'ستون':60,'ستين':60,'سبعون':70,'سبعين':70,'ثمانون':80,'ثمانين':80,'تسعون':90,'تسعين':90};
+const AR_HUNDREDS={'مائة':100,'مئة':100,'مايه':100,'مايتين':200,'مائتان':200,'مائتين':200,'مئتان':200,'مئتين':200,'ثلاثمائة':300,'ثلاثمئة':300,'أربعمائة':400,'اربعمائة':400,'خمسمائة':500,'خمسمئة':500,'ستمائة':600,'ستمئة':600,'سبعمائة':700,'سبعمئة':700,'ثمانمائة':800,'ثمانمئة':800,'تسعمائة':900,'تسعمئة':900};
+const AR_SCALES={'ألف':1000,'الف':1000,'ألفان':2000,'ألفين':2000,'الفين':2000,'ألفا':2000,'آلاف':1000,'الاف':1000,'ألوف':1000,'مليون':1000000,'مليونان':2000000,'مليونين':2000000,'ملايين':1000000};
+function arWordsToNum(t){if(!t)return null;t=String(t).replace(/[،ٍ]/g,'').replace(/\bال(ألف|الف|مليون|مائة|مئة|آلاف|الاف)\b/g,'$1').replace(/\s+/g,' ').trim();if(!t)return null;const ws=t.split(/\s+و\s+|\s+/);let tot=0,cur=0,f=false;const all={...AR_ONES,...AR_TEENS,...AR_TENS,...AR_HUNDREDS,...AR_SCALES};for(let i=0;i<ws.length;i++){const w=ws[i];let v=null;if(AR_TEENS[w+' '+ws[i+1]]!=null){v=AR_TEENS[w+' '+ws[i+1]];i++}else if(AR_ONES[w]!=null)v=AR_ONES[w];else if(AR_TENS[w]!=null)v=AR_TENS[w];else if(AR_HUNDREDS[w]!=null)v=AR_HUNDREDS[w];else if(AR_SCALES[w]!=null){const s=AR_SCALES[w];if(cur===0)cur=1;tot+=cur*s;cur=0;f=true;continue}if(v!=null){cur+=v;f=true}}tot+=cur;return f&&tot>0?tot:null}
+const HIJRI_MONTHS={'محرم':1,'صفر':2,'ربيع الأول':3,'ربيع الاول':3,'ربيع الآخر':4,'ربيع الاخر':4,'ربيع الثاني':4,'جمادى الأولى':5,'جمادى الاولى':5,'جمادى الآخرة':6,'جمادى الاخرة':6,'جمادى الثانية':6,'رجب':7,'شعبان':8,'رمضان':9,'شوال':10,'ذو القعدة':11,'ذي القعدة':11,'ذو الحجة':12,'ذي الحجة':12};
+const DAY_Q={'غرة':1,'أول':1,'اول':1,'مطلع':1,'بداية':1,'منتصف':15,'نصف':15,'أواخر':25,'آخر':29,'نهاية':29};
+function hijriDescToISO(t){if(!t||typeof umalqura!=='function')return null;t=normalizeDigitsAny(t.trim());for(const[q,d]of Object.entries(DAY_Q)){for(const[mn,mv]of Object.entries(HIJRI_MONTHS)){const re=new RegExp('\\b'+q+'\\s+(?:من\\s+)?(?:شهر\\s+)?'+mn+'\\s+(?:عام\\s+|سنة\\s+)?(\\d{3,4})','i');const m=t.match(re);if(m){try{const g=umalqura(+m[1],mv,d).date;return `${g.getFullYear()}-${pad2(g.getMonth()+1)}-${pad2(g.getDate())}`}catch(e){}}}}for(const[mn,mv]of Object.entries(HIJRI_MONTHS)){const re=new RegExp('\\b(\\d{1,2})\\s+(?:من\\s+)?'+mn+'\\s+(\\d{3,4})','i');const m=t.match(re);if(m){try{const g=umalqura(+m[2],mv,+m[1]).date;return `${g.getFullYear()}-${pad2(g.getMonth()+1)}-${pad2(g.getDate())}`}catch(e){}}}return null}
+function extractParties(t){const r={};const cm=t.match(/(?:شركة|مؤسسة|مصنع|مجموعة|مركز|مكتب)\s+([^،.\n]{2,60}?)(?=[،.\n]|بأجر|براتب|اعتبار|منذ|والذي|$)/);if(cm)r.defendant=(cm[0]).trim().replace(/[،.]$/,'');const nm=t.match(/(?:المدعي|ادعى|السيد|الأستاذ)\s+([أ-ي][أ-ي\s]{2,40}?)(?=\s+(?:أنه|بأنه|أن|قال|يعمل|عمل)|[،.\n])/);if(nm){const bn=nm[0].match(/بن\s+[أ-ي][أ-ي\s]{2,40}/);r.plaintiff=(nm[1]+(bn?' '+bn[0]:'')).trim().replace(/\s+/g,' ')}return r}
+function extractArWordAmountFromStart(t){if(!t)return null;const all={...AR_ONES,...AR_TEENS,...AR_TENS,...AR_HUNDREDS,...AR_SCALES};let c=t.replace(/[\(\)]/g,' ').replace(/(?:ريال(?:اً|ا)?|ر\.س)/g,' ').replace(/^[\s،,]+/,'').trim();if(!c)return null;const ws=c.split(/\s+/).flatMap(w=>{if(w.length>1&&w.startsWith('و')){const r=w.substring(1);if(all[r]!=null)return['و',r]}return[w]});const nw=[];for(const w of ws){if(all[w]!=null||w==='و')nw.push(w);else break}while(nw[nw.length-1]==='و')nw.pop();if(!nw.length)return null;return arWordsToNum(nw.join(' '))}
+function extractAmount(t,kws){const kw=kws.join('|');const M='(?:ال)?(?:شهري(?:ة|ًا|ا)?|شهريًا)';const C='(?:مقدار(?:ه|ها)|قدر(?:ه|ها)|قيمت(?:ه|ها)|بمبلغ|بقيمة|هو|قيمته|قدره)';const np=['(?:'+kw+')\\s*[:=]?\\s+'+M+'\\s+'+C+'\\s*[\\(]?\\s*([\\d,.]+)','(?:'+kw+')\\s*[:=]?\\s+'+M+'\\s*[\\(]?\\s*([\\d,.]+)','(?:'+kw+')\\s*[:=]?\\s+'+C+'\\s*[\\(]?\\s*([\\d,.]+)','(?:'+kw+')\\s*[:=]?\\s*[\\(]?\\s*([\\d,.]+)'];for(const p of np){const m=t.match(new RegExp(p,'i'));if(m)return m[1].replace(/,/g,'')}const kp=['(?:'+kw+')\\s*[:=]?\\s+'+M+'\\s+'+C+'\\s+','(?:'+kw+')\\s*[:=]?\\s+'+M+'\\s+','(?:'+kw+')\\s*[:=]?\\s+'+C+'\\s+','(?:'+kw+')\\s*[:=]?\\s+'];for(const p of kp){const m=t.match(new RegExp(p,'i'));if(m){const s=m.index+m[0].length,r=t.substring(s),a=extractArWordAmountFromStart(r);if(a)return String(a)}}return null}
+function extractFromText(txt){txt=normalizeDigitsAny(String(txt||''));const r={found:{}};if(!txt.trim())return r;const bk=['الأجر\\s*الأساسي','الأساسي','الراتب\\s*الأساسي','بأجر[ةه]?','بأجرة\\s*شهرية','براتب','بمرتب','الأجر','الاجر','الراتب','المرتب','أجرة','أجره','راتبه','يتقاضى'];const b=extractAmount(txt,bk);if(b)r.found.basic=b;const ak=['البدلات','بدلات','البدل','بدل\\s*السكن','بدل\\s*النقل','\\bبدل\\b'];const a=extractAmount(txt,ak);if(a)r.found.allow=a;const afk=['بعد\\s*(?:حسم\\s*)?التأمينات','صافي','الصافي'];const af=extractAmount(txt,afk);if(af)r.found.after=af;function fd(ps){for(const p of ps){const m=txt.match(p);if(m){let raw=m[1].trim();raw=raw.replace(/^(?:تاريخ|بتاريخ|يوم|في|من|شهر|عام|سنة)\s+/g,'').trim();const iso=parseFlexibleGregorianToISO(raw);if(iso)return iso;const h=hijriDescToISO(raw);if(h)return h}}return null}r.found.relStart=fd([/(?:بداية|بدء|بدأ|التحق|تعيين|توظيف)\s*(?:العلاقة|العقد|العمل)?\s*[:=]?\s*(?:من\s+(?:تاريخ\s+)?|في\s+(?:تاريخ\s+)?|بتاريخ\s+)?([\d\-\/\.\s]+?(?:م|هـ)?)(?=[،,؛\n]|\s+(?:وحتى|إلى|حتى|و)|$)/i,/(?:اعتبار(?:ًا|ا)?\s*من)\s+([\d\-\/\.\s]+?(?:م|هـ)?)(?=[،,؛\n]|\s+(?:وحتى|إلى|حتى|و)|$)/i]);r.found.relEnd=fd([/(?:نهاية|انتهاء|أُنهيت|فُسخ|فسخ|أنهيت|ترك|استقال)\s*(?:العلاقة|العقد|الخدمة)?\s*[:=]?\s*(?:في\s+(?:تاريخ\s+)?|بتاريخ\s+|يوم\s+)?([\d\-\/\.\s]+?(?:م|هـ)?)(?=[،,؛\n]|\s+(?:و|ثم|حيث|براتب|بأجر)|$)/i,/(?:وحتى|إلى\s+تاريخ|حتى\s+تاريخ|إلى|حتى)\s+(?:تاريخ\s+)?([\d\-\/\.\s]+?(?:م|هـ)?)(?=[،,؛\n]|\s+(?:و|ثم|حيث|براتب|بأجرة)|$)/i]);r.found.contractEnd=fd([/(?:انتهاء\s*(?:مدة\s*)?العقد|نهاية\s*(?:مدة\s*)?العقد)\s*[:=]?\s*(?:في\s+|بتاريخ\s+)?([\d\-\/\.\s]+?(?:م|هـ)?)(?=[،,؛\n]|\s)/i]);const ld=fd([/(?:آخر\s*يوم\s*عمل|اخر\s*يوم\s*عمل)\s*[:=]?\s*(?:في\s+|بتاريخ\s+)?([\d\-\/\.\s]+?(?:م|هـ)?)(?=[،,؛\n]|\s)/i]);if(ld)r.found.limLastDay=ld;const cd=fd([/(?:تقديم\s*الدعوى|قُيدت|قيدت)\s*(?:بتاريخ\s+|في\s+)?([\d\-\/\.\s]+?(?:م|هـ)?)(?=[،,؛\n]|\s)/i]);if(cd)r.found.limClaimDay=cd;let m=txt.match(/(?:فترة\s*التجربة|مدة\s*التجربة)\s*[:=]?\s*(\d+)/i);if(m)r.found.probDays=m[1];const p=extractParties(txt);if(p.plaintiff)r.found.plaintiff=p.plaintiff;if(p.defendant)r.found.defendant=p.defendant;return r}
+function renderPreview(r){const box=document.getElementById('qePreview');if(!r||!r.found||!Object.keys(r.found).length){box.classList.remove('show');box.innerHTML='';return}const l={basic:'أجر',allow:'بدلات',after:'صافي',relStart:'بداية',relEnd:'نهاية',contractEnd:'انتهاء عقد',limLastDay:'آخر يوم',limClaimDay:'الدعوى',probDays:'تجربة',plaintiff:'المدعي',defendant:'المدعى عليه'};const it=Object.entries(r.found).filter(([,v])=>v).map(([k,v])=>{let val=v;if(['relStart','relEnd','contractEnd','limLastDay','limClaimDay'].includes(k))val=fmtDate(v);return`<span class="qe-item"><b>${l[k]||k}:</b> ${escapeHtml(val)}</span>`});box.innerHTML='<b>🧠 سيتم تعبئة:</b><br>'+it.join('');box.classList.add('show')}
+function applyExtracted(r){if(!r||!r.found)return;const f=r.found;let c=0;Object.entries(f).forEach(([k,v])=>{if(!v)return;const el=document.getElementById(k);if(el){el.value=v;c++}});if(c){runLive();updateDateConverters();calcLimitation();showToast('🧠 '+c+' حقلاً')}else showToast('لم يُعثر')}
+
+let __mCB=null;
+function openModal(t,d,v,cb){document.getElementById('modalTitle').textContent=t;document.getElementById('modalDesc').textContent=d;const inp=document.getElementById('modalInput');inp.value=v||'';document.getElementById('modalOverlay').classList.add('open');__mCB=cb;setTimeout(()=>{inp.focus();inp.select()},50)}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');__mCB=null}
+function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawerOverlay').classList.add('open')}
+function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawerOverlay').classList.remove('open')}
+function toggleDrawer(){document.getElementById('drawer').classList.contains('open')?closeDrawer():openDrawer()}
+function filterDrawer(q){q=(q||'').toLowerCase();document.querySelectorAll('.drawer-link').forEach(l=>{const n=((l.getAttribute('data-name')||'')+' '+l.textContent).toLowerCase();l.classList.toggle('hidden',q&&!n.includes(q))});document.querySelectorAll('.drawer-group').forEach(g=>g.classList.toggle('hidden',g.querySelectorAll('.drawer-link:not(.hidden)').length===0))}
+function openCasesDrawer(){document.getElementById('casesDrawer').classList.add('open');document.getElementById('casesOverlay').classList.add('open');renderCasesList('')}
+function closeCasesDrawer(){document.getElementById('casesDrawer').classList.remove('open');document.getElementById('casesOverlay').classList.remove('open')}
+function toggleCasesDrawer(){document.getElementById('casesDrawer').classList.contains('open')?closeCasesDrawer():openCasesDrawer()}
+
+document.getElementById('btnDrawer').addEventListener('click',toggleDrawer);
+document.getElementById('btnDrawerClose').addEventListener('click',closeDrawer);
+document.getElementById('drawerOverlay').addEventListener('click',closeDrawer);
+document.querySelectorAll('.drawer-link').forEach(l=>l.addEventListener('click',()=>setTimeout(closeDrawer,180)));
+document.getElementById('drawerSearch').addEventListener('input',e=>filterDrawer(e.target.value));
+document.getElementById('btnCases').addEventListener('click',toggleCasesDrawer);
+document.getElementById('btnCasesClose').addEventListener('click',closeCasesDrawer);
+document.getElementById('casesOverlay').addEventListener('click',closeCasesDrawer);
+document.getElementById('casesSearch').addEventListener('input',e=>renderCasesList(e.target.value));
+document.getElementById('btnSaveCase').addEventListener('click',()=>{const a=getActiveCaseId();if(a){if(confirm('تحديث؟')){updateActiveCase();showToast('✓');return}}openModal('حفظ','الاسم:','دعوى '+new Date().toLocaleDateString('en-GB'),n=>saveCurrentAsCase(n))});
+document.getElementById('btnExportCase').addEventListener('click',exportCurrent);
+document.getElementById('btnImportCase').addEventListener('click',()=>document.getElementById('importFileInput').click());
+document.getElementById('importFileInput').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)importFile(f);e.target.value=''});
+document.getElementById('casesList').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=b.getAttribute('data-act'),i=b.getAttribute('data-id');if(a==='load')loadCase(i);else if(a==='rename')renameCase(i);else if(a==='dup')dupCase(i);else if(a==='del')delCase(i)});
+document.querySelectorAll('.card').forEach(c=>{const h=c.querySelector(':scope>h2');if(h)h.addEventListener('click',()=>c.classList.toggle('collapsed'))});
+let __ac=false;
+document.getElementById('btnCollapseAll').addEventListener('click',()=>{__ac=!__ac;document.querySelectorAll('.card').forEach(c=>c.classList.toggle('collapsed',__ac));document.getElementById('btnCollapseAll').classList.toggle('active',__ac)});
+document.getElementById('btnCompact').addEventListener('click',()=>{document.body.classList.toggle('compact');try{localStorage.setItem('lc_compact',document.body.classList.contains('compact')?'1':'0')}catch(e){}document.getElementById('btnCompact').classList.toggle('active',document.body.classList.contains('compact'))});
+try{if(localStorage.getItem('lc_compact')==='1')document.body.classList.add('compact')}catch(e){}document.getElementById('btnCompact').classList.toggle('active',document.body.classList.contains('compact'));
+document.getElementById('btnDark').addEventListener('click',toggleDark);
+document.getElementById('btnDiscussion').addEventListener('click',()=>{document.body.classList.toggle('discussion');try{localStorage.setItem('lc_discussion',document.body.classList.contains('discussion')?'1':'0')}catch(e){}document.getElementById('btnDiscussion').classList.toggle('active',document.body.classList.contains('discussion'));showToast(document.body.classList.contains('discussion')?'🎤 عرض للمناقشة':'✓ عادي')});
+try{if(localStorage.getItem('lc_discussion')==='1')document.body.classList.add('discussion')}catch(e){}document.getElementById('btnDiscussion').classList.toggle('active',document.body.classList.contains('discussion'));
+document.getElementById('btnMsHide').addEventListener('click',()=>{document.body.classList.add('ms-hidden');try{localStorage.setItem('lc_ms_hidden','1')}catch(e){}});
+try{if(localStorage.getItem('lc_ms_hidden')==='1')document.body.classList.add('ms-hidden')}catch(e){}
+document.getElementById('btnPrint').addEventListener('click',()=>window.print());
+document.getElementById('btnReset').addEventListener('click',()=>{if(!confirm('تصفير؟'))return;resetAll();clearHistory();pushHistory();try{localStorage.removeItem(AUTOSAVE_KEY)}catch(e){}showToast('✓')});
+document.getElementById('btnUndo').addEventListener('click',doUndo);
+document.getElementById('btnRedo').addEventListener('click',doRedo);
+document.getElementById('modalCancel').addEventListener('click',closeModal);
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target.id==='modalOverlay')closeModal()});
+document.getElementById('modalOk').addEventListener('click',()=>{const v=document.getElementById('modalInput').value;const cb=__mCB;closeModal();if(cb)cb(v)});
+document.getElementById('modalInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('modalOk').click();else if(e.key==='Escape')closeModal()});
+document.getElementById('btnQExtract').addEventListener('click',()=>{const r=extractFromText(document.getElementById('qeInput').value);if(!Object.keys(r.found).length)return showToast('❌');applyExtracted(r);renderPreview(r)});
+document.getElementById('btnQClear').addEventListener('click',()=>{document.getElementById('qeInput').value='';const p=document.getElementById('qePreview');p.classList.remove('show');p.innerHTML=''});
+document.getElementById('qeInput').addEventListener('input',()=>renderPreview(extractFromText(document.getElementById('qeInput').value)));
+document.addEventListener('keydown',e=>{const c=e.ctrlKey||e.metaKey;if(e.altKey&&!c&&!e.shiftKey){const k=e.key.toLowerCase();if(k==='m'){e.preventDefault();toggleDrawer()}else if(k==='c'){e.preventDefault();toggleCasesDrawer()}else if(k==='r'){e.preventDefault();document.getElementById('btnReset').click()}else if(k==='p'){e.preventDefault();window.print()}}else if(c&&!e.altKey&&!e.shiftKey){if(e.key==='z'){e.preventDefault();doUndo()}else if(e.key==='y'){e.preventDefault();doRedo()}}else if(e.key==='Escape'){if(document.getElementById('modalOverlay').classList.contains('open'))closeModal();else if(document.getElementById('drawer').classList.contains('open'))closeDrawer();else if(document.getElementById('casesDrawer').classList.contains('open'))closeCasesDrawer()}});
+(function(){const l=loadAutoSave();if(l)setTimeout(()=>showToast('✓ استُعيدت المسودة'),400);updateCaseTag();clearHistory();pushHistory();buildAllReasons();const g=document.getElementById('sum-grand'),m=document.getElementById('ms-grand');if(g&&m)m.textContent=g.textContent})();
+
+/* ============ ℹ️ نظام الأيقونات الإرشادية المنبثقة ============ */
+const INFO_TEXTS = {
+  general: {
+    title: 'البيانات العامة والأجر',
+    body: `هذه البطاقة تجمع البيانات الرئيسية التي تعتمد عليها بقية الحاسبة.
+<ul>
+<li><b>الأجر الأساسي + البدلات = الإجمالي</b> (يُحسب تلقائيًا).</li>
+<li><b>الأجر بعد التأمينات</b>: يُستخدم في احتساب الأجور المتأخرة.</li>
+<li><b>تواريخ العلاقة والعقد</b>: تُنقل تلقائيًا إلى بطاقات نهاية الخدمة وفسخ العقد ورصيد الإجازات وفترة التجربة.</li>
+<li><b>أسماء الأطراف</b>: تظهر تلقائيًا في صياغات المطالبات وجمل التسبيب والمنطوق.</li>
+</ul>
+<div class="info-formula">صيغ التاريخ المقبولة: 2026-2-4 أو 4-2-2026 أو ٠٤-٠٢-٢٠٢٦ (يدعم الأرقام العربية والإنجليزية).</div>`
+  },
+  dateconv: {
+    title: 'تحويل التاريخ (ميلادي ↔ هجري أم القرى)',
+    body: `تحويل بين التقويم الميلادي والهجري (أم القرى) بدقة عالية.
+<ul>
+<li><b>ميلادي → هجري</b>: أدخل التاريخ في الحقل العلوي.</li>
+<li><b>هجري → ميلادي</b>: أدخل التاريخ في الحقل السفلي.</li>
+<li>يدعم صيغ متعددة: <b>2026-2-4</b>، <b>4/2/2026</b>، أو الأنماط الوصفية للهجري.</li>
+<li>يعتمد على مكتبة أم القرى الرسمية (@umalqura/core).</li>
+</ul>`
+  },
+  probation: {
+    title: 'حاسبة فترة التجربة',
+    body: `تعتمد على تاريخ بدء العلاقة وتاريخ انتهاء العلاقة من البيانات العامة.
+<div class="info-article"><b>تحتسب الحاسبة تلقائيًا العطل الرسمية</b> الواقعة داخل فترة التجربة:
+<ul>
+<li>عيد الفطر</li>
+<li>عيد الأضحى</li>
+<li>يوم التأسيس</li>
+<li>اليوم الوطني</li>
+</ul>
+ثم تمدد نهاية فترة التجربة بقدرها.</div>
+<b>الحقول اليدوية:</b>
+<ul>
+<li><b>أيام الإجازة المرضية</b>: تُدخل يدويًا (تُخصم من فترة التجربة).</li>
+<li><b>أيام مستثناة أخرى</b>: أي إجازات أخرى غير محتسبة من التجربة.</li>
+</ul>
+<div class="info-formula">الحد الأقصى لفترة التجربة (180 يومًا) وفق المادة (54) من نظام العمل.</div>
+<b>الأثر النظامي:</b> إذا وقع الإنهاء خلال فترة التجربة، لا تستحق مكافأة نهاية الخدمة ولا تعويض فسخ العقد.`
+  },
+  limitation: {
+    title: 'حاسبة التقادم (المادة 234)',
+    body: `<div class="info-article">تنص <b>المادة (234)</b> من نظام العمل: «لا تُسمَع - عند الإنكار وعدم العذر المقبول - أي دعوى تُرفع بعد اثني عشر شهرًا من تاريخ انتهاء علاقة العمل».</div>
+<b>آلية الحساب:</b>
+<ul>
+<li>يبدأ العد من <b>اليوم التالي</b> لآخر يوم عمل.</li>
+<li>حتى تاريخ تقديم الدعوى.</li>
+<li>إذا كان عدد الأيام <b>≤ 360</b> → <span style="color:var(--reason-accept)">لا تقادم</span>.</li>
+<li>إذا صار <b>≥ 361</b> → <span style="color:var(--reason-reject)">يظهر التقادم</span>.</li>
+</ul>
+<b>مع مراعاة:</b> العذر المقبول أو الإقرار بالحق (يوقفان مدة عدم السماع).`
+  },
+  notice: {
+    title: 'مهلة الإشعار وبدل الإشعار (المادة 75)',
+    body: `<div class="info-article">تنص <b>المادة (75)</b> من نظام العمل على إشعار الطرف الآخر قبل الإنهاء.</div>
+<b>الحد الأدنى النظامي:</b>
+<ul>
+<li><b>60 يومًا</b> للعقود غير محددة المدة إذا كان أجر العامل يُدفع شهريًا.</li>
+<li><b>30 يومًا</b> لغيرها.</li>
+</ul>
+<b>تسري القاعدة على الطرفين:</b> إذا أنهى أحدهما العقد دون التزام بمهلة الإشعار، استحق الطرف الآخر بدل الإشعار وفق المادة (76).
+<div class="info-formula"><b>بدل الإشعار = أجر اليوم × عدد أيام المدة المعتمدة</b></div>
+<b>⚠️ تنبيه نظامي:</b> المهلة <b>لا ترد</b> على العقد محدد المدة إلا بشرط تعاقدي. الأثر النظامي للإنهاء المبكر هو <b>تعويض المدة المتبقية</b> وفق المادة (77).
+<b>حقل «الأيام التي التزم بها العامل»:</b> يظهر عند اختيار «صاحب العمل» كطرف مطالِب، لاحتساب البدل عن الأيام الناقصة فقط.`
+  },
+  latewages: {
+    title: 'الأجور المتأخرة',
+    body: `تُحسب على أساس <b>الأجر بعد حسم التأمينات</b> ÷ 30 (أجر اليوم).
+<b>طريقتان للإدخال:</b>
+<ul>
+<li><b>بالتاريخ من إلى</b>: تُحتسب المدة تلقائيًا (شاملة اليومين).</li>
+<li><b>بعدد الأشهر والأيام</b>: للحالات التي تُدخل المدة مباشرة.</li>
+</ul>
+<div class="info-formula">الأيام = (الأشهر × 30) + الأيام<br>الإجمالي = أجر اليوم × عدد الأيام</div>
+<b>الأساس الحسابي:</b> السنة 360 يومًا / الشهر 30 يومًا (كما استقر عليه القضاء العمالي).`
+  },
+  eosb: {
+    title: 'مكافأة نهاية الخدمة',
+    body: `<div class="info-article"><b>المادة (84)</b> - الاحتساب النظامي الأصلي:
+<ul>
+<li><b>أجر نصف شهر</b> عن كل سنة من السنوات الخمس الأولى.</li>
+<li><b>أجر شهر كامل</b> عن كل سنة تالية.</li>
+</ul></div>
+<div class="info-article"><b>المادة (85)</b> - في حالة استقالة العامل:
+<ul>
+<li><b>ثلث المكافأة</b>: بعد سنتين، حتى خمس.</li>
+<li><b>ثلثا المكافأة</b>: بعد خمس، حتى عشر.</li>
+<li><b>كامل المكافأة</b>: عشر سنوات فأكثر.</li>
+</ul></div>
+<b>الحقول:</b>
+<ul>
+<li><b>إجازات بدون أجر</b>: تُخصم من إجمالي مدة الخدمة.</li>
+<li><b>أساس الأجر</b>: الإجمالي (أساسي + بدلات) أو بعد التأمينات.</li>
+</ul>
+<div class="info-formula">تُحسب المدة على أساس (السنة 360 يوم / الشهر 30 يوم).</div>
+<b>⚠️ لا تستحق</b>: إذا وقع الإنهاء في فترة التجربة، أو ضمن حالات المادة (80).`
+  },
+  vacation: {
+    title: 'التعويض عن رصيد الإجازات',
+    body: `<div class="info-article"><b>المادة (109)</b>: للعامل إجازة سنوية مدفوعة الأجر:
+<ul>
+<li><b>21 يومًا</b> للسنوات الخمس الأولى (الحد الأدنى).</li>
+<li><b>30 يومًا</b> بعد خمس سنوات متصلة.</li>
+</ul></div>
+<div class="info-article"><b>المادة (111)</b>: للعامل الحق في أجر عن أيام الإجازة المستحقة إذا ترك العمل قبل استعمالها.</div>
+<b>آلية الحساب:</b>
+<div class="info-formula">
+المستحقة = (سنوات الخدمة × عدد أيام الإجازة السنوية)<br>
+المتبقي = المستحقة - المصروف<br>
+<b>التعويض = المتبقي × أجر اليوم</b>
+</div>
+<b>ملاحظة:</b> يمكن تعديل عدد أيام الإجازة السنوية إذا كان العقد ينص على أكثر من الحد الأدنى النظامي.`
+  },
+  termination: {
+    title: 'التعويض عن فسخ العقد',
+    body: `<div class="info-article"><b>المادة (77)</b>: إذا أُنهي العقد لسبب غير مشروع كان للطرف المتضرر الحق في تعويض:
+<ul>
+<li><b>عقد محدد المدة</b>: أجر المدة المتبقية من العقد.</li>
+<li><b>عقد غير محدد المدة</b>: أجر خمسة عشر يومًا عن كل سنة من سنوات الخدمة.</li>
+</ul>
+<b>الحد الأدنى في كليهما: أجر شهرين.</b></div>
+<b>📜 الشرط الجزائي (التعويض الاتفاقي):</b>
+عند وجود شرط في العقد بتعويض محدد، يُحتسب على أساسه بدل المادة (77)، مع مراعاة الحد الأدنى النظامي.
+<ul>
+<li><b>مبلغ مقطوع</b>: مبلغ ثابت متفق عليه.</li>
+<li><b>عدد أشهر</b>: يُضرب في الأجر الشهري.</li>
+<li><b>عدد أيام</b>: يُضرب في أجر اليوم.</li>
+</ul>
+<div class="info-formula">الحد الأدنى = 2 × الأجر الشهري (يُطبَّق تلقائيًا إذا كان الشرط أقل).</div>
+<b>⚠️ لا يستحق</b>: إذا وقع الإنهاء في فترة التجربة، أو كان الفسخ لسبب مشروع (م80/م81).`
+  },
+  overtime: {
+    title: 'ساعات العمل الإضافية',
+    body: `<div class="info-article"><b>المادة (107)</b>: إذا وقعت ظروف اقتضت تشغيل العامل أكثر من ساعات العمل العادية، وجب دفع أجر إضافي.</div>
+<div class="info-formula"><b>أجر الساعة الإضافية</b> = أجر الساعة من الأجر الفعلي <b>+ 50%</b> من أجر الساعة الأساسي.</div>
+<b>تفصيل الحساب:</b>
+<ul>
+<li>أجر الساعة الفعلي = (الأجر الإجمالي ÷ 30) ÷ ساعات العمل اليومية.</li>
+<li>أجر الساعة الأساسي = (الأجر الأساسي ÷ 30) ÷ ساعات العمل اليومية.</li>
+<li>أجر الساعة الإضافية = الفعلي + (50% × الأساسي).</li>
+</ul>
+<b>ساعات العطل والأعياد</b> تعد ساعات إضافية بذات المعادلة.
+<div class="info-article"><b>الحد الأقصى النظامي:</b> 720 ساعة إضافية سنويًا. عند التجاوز يُشترط موافقة العامل.</div>`
+  },
+  deduction: {
+    title: 'خصم الغياب والتأخر',
+    body: `يُحسب بضرب:
+<ul>
+<li><b>أيام الغياب × أجر اليوم</b>.</li>
+<li><b>ساعات التأخر × أجر الساعة</b>.</li>
+<li><b>دقائق التأخر ÷ 60 × أجر الساعة</b>.</li>
+</ul>
+<div class="info-formula">
+أجر اليوم = الأجر الشهري ÷ 30<br>
+أجر الساعة = أجر اليوم ÷ عدد ساعات العمل اليومية
+</div>
+<b>أساس الأجر:</b> يمكن اختيار الإجمالي (أساسي + بدلات) أو بعد حسم التأمينات، حسب طبيعة القضية.`
+  },
+  avgwage: {
+    title: 'معرفة متوسط الأجر لآخر سنة',
+    body: `أدخل ما تقاضاه العامل في آخر سنة (حتى لو بعض الشهور فقط).
+<div class="info-formula">
+متوسط الأجر = (مجموع الأجور المدخلة) ÷ (عدد الأشهر المدخلة)
+</div>
+<b>الاستخدام:</b>
+<ul>
+<li>مفيدة لتحديد الأجر المتغير أو غير الثابت.</li>
+<li>تُستأنس بها في احتساب المستحقات عندما يتذبذب الأجر.</li>
+<li>يمكن الاستفادة منها كأساس لإثبات الأجر الفعلي عند التنازع.</li>
+</ul>
+<b>ملاحظة:</b> الأشهر الفارغة (بدون قيمة) لا تدخل في المعادلة.`
+  },
+  claims: {
+    title: 'صياغة المطالبات',
+    body: `صياغات جاهزة لكل بند من بنود المطالبة تتضمن:
+<ul>
+<li><b>المبلغ رقمًا وكتابةً</b> (بالعربية).</li>
+<li><b>سبب المطالبة</b> النظامي.</li>
+<li><b>تفصيل المدة</b> (من - إلى - إجمالي الأيام).</li>
+<li>الأساس الحسابي (السنة 360 يوم / الشهر 30 يوم).</li>
+</ul>
+<b>الاستخدام:</b>
+<ul>
+<li>يمكن نسخ كل بند فرديًا عبر زر «نسخ».</li>
+<li>«نسخ الكل» يجمع جميع البنود المفعّلة بترتيب (أولًا / ثانيًا / ...).</li>
+<li>الأسماء تُستمد من حقلَي المدعي والمدعى عليه في البيانات العامة.</li>
+</ul>`
+  },
+  settlement: {
+    title: 'الصلح',
+    body: `<div class="info-article">يعتمد التسبيب على <b>الفقرة (3/70)</b> من اللائحة التنفيذية لنظام المرافعات الشرعية: «الصك الصادر بإثبات الصلح لا يخضع للاستئناف».<br>الكود المرجعي المعتمد: <b>SLH-70/3</b>.</div>
+<b>حالات الصلح المدعومة:</b>
+<ul>
+<li><b>صلح كلي</b>: شامل لجميع المستحقات المتبادلة.</li>
+<li><b>صلح جزئي</b>: في جزء من المطالبات.</li>
+<li><b>صلح مع إسقاط ما زاد</b>: قبول مبلغ مع إسقاط ما زاد من مطالبات.</li>
+</ul>
+<div class="info-article"><b>⚠️ مهم:</b> ما تكتبه في حقل «بنود الصلح» يُدرج <b>حرفيًا</b> في المنطوق.
+<br>اكتب البنود كما تريد أن تظهر في الحكم.</div>
+<b>صيغة المنطوق المعتمدة:</b>
+<div class="info-formula">«ثبت لدي هذا الصلح بأن [بنود الصلح]، وألزمت الطرفين العمل به، وأفهمتهما بأن الحكم نهائي غير خاضع للاعتراض».</div>`
+  },
+  servicecert: {
+    title: 'شهادة الخدمة',
+    body: `<div class="info-article"><b>المادة (64)</b> من نظام العمل: «يعطي صاحب العمل العامل - بناءً على طلبه - عند انتهاء عقد العمل <b>شهادة خدمة دون مقابل</b>، يوضح فيها تاريخ التحاقه بالعمل وتاريخ انتهاء علاقته به ومهنته ومقدار أجره الأخير».</div>
+<b>عناصر الشهادة:</b>
+<ul>
+<li>تاريخ التحاق العامل بالعمل.</li>
+<li>تاريخ انتهاء العلاقة العمالية.</li>
+<li>المهنة.</li>
+<li>مقدار الأجر الأخير.</li>
+</ul>
+<b>الصياغة المعتمدة للمنطوق:</b>
+<div class="info-formula">«إلزام المدعى عليها أن تسلم للمدعي شهادة عن مدة خدمته من (...) إلى (...) بأجر (...) وبمهنة (...)».</div>
+<b>ملاحظة:</b> الحق في الشهادة ثابت بالنص النظامي دون اشتراط سبب معين لانتهاء العلاقة.`
+  },
+  reasons: {
+    title: '⚖️ جمل التسبيب الجاهزة',
+    body: `جمل تسبيب <b>مطوّلة</b> بالنمط القضائي السعودي المعتمد (SYL-3): <b>نص نظامي ← واقعة ثابتة ← نتيجة</b>.
+<b>مميزات النظام:</b>
+<ul>
+<li>لكل بند <b>تبويبان</b>: قبول ورفض (تسبيبان جاهزان لكل حالة).</li>
+<li>الجمل <b>قابلة للتعديل</b> قبل النسخ (زر «✏️ تعديل»).</li>
+<li>تعتمد الأسلوب: «ولما كانت المادة... وكانت... ولما ثبت... فبناءً على ما تقدم...».</li>
+<li>تجنّب «وحيث إن» تمامًا (حسب التفضيل).</li>
+<li>الأرقام تُكتب رقمًا <b>وكتابةً</b> بالعربية.</li>
+<li>الاستشهاد بأرقام المواد النظامية بالأرقام العربية (٧٥، ٨٤، ١٠٧...).</li>
+</ul>
+<b>الحالات الخاصة:</b>
+<ul>
+<li><b>فترة التجربة</b>: يظهر تسبيب رفض تلقائيًا مع الإشارة إلى المادة (٥٣).</li>
+<li><b>الشرط الجزائي</b>: تسبيب مستقل يعتمد الشرط بدل المادة (٧٧).</li>
+<li><b>الصلح</b>: منطوق منفصل بصيغة «ثبت لدي هذا الصلح بأن...».</li>
+<li><b>شهادة الخدمة</b>: منطوق منفصل بالصيغة المعتمدة.</li>
+</ul>
+<b>📢 المنطوق الشامل:</b> يجمع تلقائيًا جميع البنود المفعّلة بترتيب (أولًا / ثانيًا / ...) مع «رد ما زاد من طلبات» في النهاية.`
+  }
+};
+
+function openInfoModal(key){
+  const info = INFO_TEXTS[key];
+  if(!info) return;
+  document.getElementById('infoModalTitle').textContent = info.title;
+  document.getElementById('infoModalBody').innerHTML = info.body;
+  document.getElementById('infoModalOverlay').classList.add('open');
+}
+function closeInfoModal(){
+  document.getElementById('infoModalOverlay').classList.remove('open');
+}
+
+// ربط أحداث الأيقونات مع منع تفعيل الطي/الفتح للبطاقة
+document.querySelectorAll('.info-icon').forEach(icon=>{
+  icon.addEventListener('click', e=>{
+    e.stopPropagation();
+    e.preventDefault();
+    const key = icon.getAttribute('data-info');
+    openInfoModal(key);
+  });
+});
+document.getElementById('infoModalClose').addEventListener('click', closeInfoModal);
+document.getElementById('infoModalOverlay').addEventListener('click', e=>{
+  if(e.target.id === 'infoModalOverlay') closeInfoModal();
+});
+// دعم مفتاح Escape
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape' && document.getElementById('infoModalOverlay').classList.contains('open')){
+    closeInfoModal();
+  }
+});
+</script>
+<script>
+/* ضبط المدخلات - أضيف في المراجعة المحدودة */
+(function(){
+ const numericIds=['basic','allow','after','probDays','probSick','probOtherExcluded','rlMonths','rlDays','esUnpaidDays','mvFirst5','mvAfter5','vacUsed','termClauseAmount','termClauseMonths','termClauseDays','otHours','otHolidayHours','otYearHours','absDays','absLateH','absLateM','ntcDays','ntcCompliedDays','r1','r2','r3','r4','r5','r6','r7','r8','r9','r10','r11','r12'];
+ numericIds.forEach(id=>{const el=document.getElementById(id);if(!el)return;el.setAttribute('min','0');el.addEventListener('input',()=>{if(toNumber(el.value)<0){el.value='0';if(typeof showToast==='function')showToast('لا تقبل القيم السالبة');}},true);});
+ const wholeIds=['probDays','probSick','probOtherExcluded','rlMonths','rlDays','esUnpaidDays','termClauseDays','ntcDays','ntcCompliedDays'];
+ wholeIds.forEach(id=>{const el=document.getElementById(id);if(el)el.setAttribute('step','1');});
+ function iso(id){const el=document.getElementById(id);if(!el||!el.value)return'';return typeof parseFlexibleGregorianToISO==='function'?(parseFlexibleGregorianToISO(el.value)||''):el.value;}
+ function reject(id,msg){const el=document.getElementById(id);if(!el)return;el.value='';if(typeof showToast==='function')showToast(msg);}
+ function checkDates(e){const id=e.target&&e.target.id;if(!id)return;const rs=iso('relStart'),re=iso('relEnd'),ce=iso('contractEnd');if((id==='relStart'||id==='relEnd')&&rs&&re&&re<rs)reject('relEnd','انتهاء العلاقة لا يسبق بدايتها');if((id==='relEnd'||id==='contractEnd')&&re&&ce&&ce<re)reject('contractEnd','انتهاء العقد لا يسبق انتهاء العلاقة');const rf=iso('rlFrom'),rt=iso('rlTo');if((id==='rlFrom'||id==='rlTo')&&rf&&rt&&rt<rf)reject('rlTo','نهاية مدة الأجور لا تسبق بدايتها');const ll=iso('limLastDay'),lc=iso('limClaimDay');if((id==='limLastDay'||id==='limClaimDay')&&ll&&lc&&lc<ll)reject('limClaimDay','تاريخ الدعوى لا يسبق آخر يوم عمل');}
+ document.addEventListener('change',checkDates,true);
+ document.addEventListener('blur',checkDates,true);
+})();
+<\/script>
+</body></html>
